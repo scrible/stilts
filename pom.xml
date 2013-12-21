@@ -10,7 +10,7 @@
 
   <groupId>org.projectodd.stilts</groupId>
   <artifactId>stilts</artifactId>
-  <version>0.1.40</version>
+  <version>0.1.40-AZAR</version>
   <packaging>pom</packaging>
   <name>Stilts</name>
   <url>http://www.jboss.org/</url>
@@ -76,7 +76,38 @@
       <id>fungal repo</id>
       <url>http://jesperpedersen.github.com/fungal/maven2</url>
     </repository>
+    <repository>
+      <id>jboss</id>
+      <name>JBoss Public Maven Repository Group</name>
+      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
   </repositories>
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>jboss</id>
+      <name>JBoss Public Maven Repository Group</name>
+      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <profiles>
     <profile>
