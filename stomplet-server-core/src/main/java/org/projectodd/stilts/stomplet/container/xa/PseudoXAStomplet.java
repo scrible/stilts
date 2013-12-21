@@ -59,7 +59,10 @@ public class PseudoXAStomplet implements XAStomplet {
     public void onSubscribe(Subscriber subscriber) throws StompException {
         log.debug(  "PXAStomplet on_subscribe: " + this.resourceManager );
         String subscriptionId = subscriber.getSubscriptionId();
-        Subscriber xaSubscriber = new SubscriberImpl( subscriber.getSession(), stomplet, subscriptionId, subscriber.getDestination(), subscriber.getParamters(), new PseudoXAStompletAcknowledgeableMessageSink( this.resourceManager, subscriber ), subscriber.getAckMode() );
+        Subscriber xaSubscriber = new SubscriberImpl( subscriber.getSession(), stomplet, subscriptionId, 
+        		subscriber.getDestination(), subscriber.getParamters(), 
+        		new PseudoXAStompletAcknowledgeableMessageSink( this.resourceManager, subscriber ), 
+        		subscriber.getAckMode(), subscriber.getHeaders() );
         this.subscribers.put( subscriber.getId(), xaSubscriber );
         this.stomplet.onSubscribe( xaSubscriber );
     }

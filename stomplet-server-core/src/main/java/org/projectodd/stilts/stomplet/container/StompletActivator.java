@@ -73,10 +73,12 @@ public class StompletActivator {
         this.route.getStomplet().onMessage( message, session );
     }
 
-    public Subscription subscribe(StompletMessageConduit messageConduit, String subscriptionId, String destination, Headers headers) throws StompException {
+    public Subscription subscribe(StompletMessageConduit messageConduit, String subscriptionId, String destination, 
+    		Headers headers) throws StompException {
         Stomplet stomplet = getRoute().getStomplet();
         AckMode ackMode = AckMode.getAckMode( headers.get( Header.ACK ) );
-        SubscriberImpl subscriber = new SubscriberImpl( messageConduit.getSession(), stomplet, subscriptionId, destination, matches, messageConduit.getMessageSink(), ackMode );
+        SubscriberImpl subscriber = new SubscriberImpl( messageConduit.getSession(), stomplet, subscriptionId, 
+        		destination, matches, messageConduit.getMessageSink(), ackMode, headers );
         stomplet.onSubscribe( subscriber );
         Subscription subscription = new SubscriptionImpl( stomplet, subscriber );
         return subscription;

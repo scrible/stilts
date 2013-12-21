@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.projectodd.stilts.stomp.Acknowledger;
+import org.projectodd.stilts.stomp.Headers;
 import org.projectodd.stilts.stomp.StompException;
 import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.Subscription.AckMode;
@@ -33,7 +34,8 @@ import org.projectodd.stilts.stomplet.Subscriber;
 public class SubscriberImpl implements Subscriber {
 
 
-    public SubscriberImpl(StompSession session, Stomplet stomplet, String subscriptionId, String destination, Map<String,String> parameters, AcknowledgeableMessageSink messageSink, AckMode ackMode) {
+    public SubscriberImpl(StompSession session, Stomplet stomplet, String subscriptionId, String destination, 
+    		Map<String,String> parameters, AcknowledgeableMessageSink messageSink, AckMode ackMode, Headers headers) {
         this.session = session;
         this.stomplet = stomplet;
         this.subscriptionId = subscriptionId;
@@ -42,6 +44,7 @@ public class SubscriberImpl implements Subscriber {
         this.messageSink = messageSink;
         //this.messageConduit = messageConduit;
         this.ackMode = ackMode;
+        this.headers = headers;
 
         if (this.ackMode == AckMode.CLIENT) {
             this.ackSet = new CumulativeAckSet();
@@ -68,6 +71,10 @@ public class SubscriberImpl implements Subscriber {
 
     public AckMode getAckMode() {
         return this.ackMode;
+    }
+    
+    public Headers getHeaders() {
+    	return this.headers;
     }
 
     @Override
@@ -138,7 +145,8 @@ public class SubscriberImpl implements Subscriber {
     
     @Override
     public String toString() {
-        return "Subscriber [id=" + subscriptionId + ", destination=" + destination + ", ackMode=" + ackMode + "]";
+        return "Subscriber [id=" + subscriptionId + ", destination=" + destination + ", ackMode=" + ackMode + 
+        		",headers=" + headers + "]";
     }
 
 
@@ -151,6 +159,7 @@ public class SubscriberImpl implements Subscriber {
     private String destination;
     private AckMode ackMode;
     private AckSet ackSet;
+    private Headers headers;
     private Map<String, String> parameters;
 
 }
