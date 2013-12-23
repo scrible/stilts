@@ -27,6 +27,7 @@ import org.projectodd.stilts.conduit.spi.StompSessionManager;
 import org.projectodd.stilts.stomp.server.Connector;
 import org.projectodd.stilts.stomp.server.Server;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
+import org.projectodd.stilts.stomp.spi.Authenticator;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 import org.projectodd.stilts.stomplet.container.StompletContainer;
 import org.projectodd.stilts.stomplet.container.StompletMessageConduitFactory;
@@ -87,6 +88,10 @@ public class StompletServer implements Server {
 
     public void setDefaultSessionManager(StompSessionManager sessionManager) {
         this.server.getMessageConduitFactory().setDefaultSessionManager( sessionManager );
+    }
+    
+    public void setAuthenticator(Authenticator authenticator) {
+    	this.server.setAuthenticator(authenticator);
     }
 
     public void start() throws Exception {

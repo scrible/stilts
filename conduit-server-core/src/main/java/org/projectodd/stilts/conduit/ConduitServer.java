@@ -30,6 +30,7 @@ import org.projectodd.stilts.stomp.server.Connector;
 import org.projectodd.stilts.stomp.server.Server;
 import org.projectodd.stilts.stomp.server.StompServer;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
+import org.projectodd.stilts.stomp.spi.Authenticator;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
 /** Adapts basic STOMP server to simpler <code>MessageConduit</code> interface.
@@ -91,9 +92,18 @@ public class ConduitServer<T extends MessageConduitFactory> implements Server {
         return this.transactionalMessageConduitFactory;
     }
 
-    public void start() throws Exception {
+    public Authenticator getAuthenticator() {
+		return authenticator;
+	}
+
+	public void setAuthenticator(Authenticator authenticator) {
+		this.authenticator = authenticator;
+	}
+
+	public void start() throws Exception {
         this.transactionalMessageConduitFactory.setTransactionManager( this.transactionManager );
-        ConduitStompProvider provider = new ConduitStompProvider( this.transactionManager, getTransactionalMessageConduitFactory() );
+        ConduitStompProvider provider = new ConduitStompProvider( this.transactionManager, 
+        		getTransactionalMessageConduitFactory(), authenticator);
         this.server.setStompProvider( provider );
         this.server.start();
     }
@@ -106,5 +116,6 @@ public class ConduitServer<T extends MessageConduitFactory> implements Server {
     private TransactionManager transactionManager;
     private T messageConduitFactory;
     private TransactionalMessageConduitFactory transactionalMessageConduitFactory;
+    private Authenticator authenticator;
 
 }
