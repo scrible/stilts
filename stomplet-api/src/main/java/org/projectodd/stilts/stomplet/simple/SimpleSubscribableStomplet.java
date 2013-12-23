@@ -16,8 +16,8 @@
 
 package org.projectodd.stilts.stomplet.simple;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.projectodd.stilts.MessageSink;
 import org.projectodd.stilts.stomp.StompException;
@@ -34,44 +34,40 @@ public abstract class SimpleSubscribableStomplet extends AbstractStomplet implem
 
     @Override
     public void onSubscribe(Subscriber subscriber) throws StompException {
-        synchronized ( this.destinations ) {
-            SubscriberList destinationSubscribers = this.destinations.get( subscriber.getDestination() );
-            if ( destinationSubscribers == null ) {
-                destinationSubscribers = new SubscriberList();
-                this.destinations.put(  subscriber.getDestination(), destinationSubscribers );
-            }
-            destinationSubscribers.addSubscriber( subscriber );
+        SubscriberList destinationSubscribers = this.destinations.get( subscriber.getDestination() );
+        if ( destinationSubscribers == null ) {
+        	SubscriberList newDestinationSubscribers = new SubscriberList();
+        	destinationSubscribers = this.destinations.putIfAbsent(  subscriber.getDestination(), 
+        			newDestinationSubscribers );
+        	if (destinationSubscribers == null) {
+        		destinationSubscribers = newDestinationSubscribers;
+        	}
         }
+        destinationSubscribers.addSubscriber( subscriber );
     }
 
     @Override
     public void onUnsubscribe(Subscriber subscriber) throws StompException {
-        synchronized ( this.destinations ) {
-            SubscriberList destinationSubscribers = this.destinations.get( subscriber.getDestination() );
-            if ( destinationSubscribers != null ) {
-                destinationSubscribers.removeSubscriber( subscriber );
-            }
+        SubscriberList destinationSubscribers = this.destinations.get( subscriber.getDestination() );
+        if ( destinationSubscribers != null ) {
+            destinationSubscribers.removeSubscriber( subscriber );
         }
     }
     
     protected void sendToAllSubscribers(StompMessage message) throws StompException {
-        synchronized ( this.destinations ) {
-            SubscriberList destinationSubscribers = this.destinations.get( message.getDestination() );
-            if ( destinationSubscribers != null ) {
-                destinationSubscribers.sendToAllSubscribers( message );
-            }
+        SubscriberList destinationSubscribers = this.destinations.get( message.getDestination() );
+        if ( destinationSubscribers != null ) {
+            destinationSubscribers.sendToAllSubscribers( message );
         }
     }
     
     protected void sendToOneSubscriber(StompMessage message) throws StompException {
-        synchronized ( this.destinations ){
-            SubscriberList destinationSubscribers = this.destinations.get( message.getDestination() );
-            if ( destinationSubscribers != null ) {
-                destinationSubscribers.sendToOneSubscriber( message );
-            }
+        SubscriberList destinationSubscribers = this.destinations.get( message.getDestination() );
+        if ( destinationSubscribers != null ) {
+            destinationSubscribers.sendToOneSubscriber( message );
         }
     }
     
-    private Map<String,SubscriberList> destinations = new HashMap<String,SubscriberList>();
+    private ConcurrentMap<String,SubscriberList> destinations = new ConcurrentHashMap<String,SubscriberList>();
 
 }
