@@ -66,6 +66,10 @@ public class StompletServer implements Server {
         return this.server.getMessageHandlingExecutor();
     }
     
+    public void setMessageHandlingExecutor(Executor executor) {
+        this.server.setMessageHandlingExecutor(executor);
+    }
+    
     public void setTransactionManager(TransactionManager transactionManager) {
         this.server.setTransactionManager( transactionManager );
     }

@@ -52,7 +52,7 @@ public class StompServerPipelineFactory implements ChannelPipelineFactory {
             sslHandler.setEnableRenegotiation( false );
             pipeline.addLast( "ssl", sslHandler );
         }
-        pipeline.addLast( "flash-policy-file-handler", new FlashPolicyFileHandler() );
+        //pipeline.addLast( "flash-policy-file-handler", new FlashPolicyFileHandler() );
         pipeline.addLast( "protocol-detector", new ProtocolDetector( this.connectionManager, this.sinkManager, this.provider, this.executor, this.resourceManager) );
         return pipeline;
     }

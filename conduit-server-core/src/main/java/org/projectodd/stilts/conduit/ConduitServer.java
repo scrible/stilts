@@ -66,6 +66,10 @@ public class ConduitServer<T extends MessageConduitFactory> implements Server {
     public Executor getMessageHandlingExecutor() {
         return this.server.getMessageHandlingExecutor();
     }
+    
+    public void setMessageHandlingExecutor(Executor executor) {
+        this.server.setMessageHandlingExecutor(executor);
+    }
 
     public void setTransactionManager(TransactionManager transactionManager) {
         this.transactionManager = transactionManager;

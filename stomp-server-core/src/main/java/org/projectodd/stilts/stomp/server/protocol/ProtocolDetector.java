@@ -103,6 +103,10 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
         ConnectionContext context = new DefaultConnectionContext();
 
         pipeline.addLast( "stomp-disorderly-close-handler", new StompDisorderlyCloseHandler( provider, context ) );
+        
+        if (this.executionHandler != null) {
+            pipeline.addLast( "stomp-threading", this.executionHandler );
+        }
 
         pipeline.addLast( "stomp-server-connect", new ConnectHandler( provider, context ) );
         pipeline.addLast( "stomp-server-disconnect", new DisconnectHandler( provider, context ) );
@@ -121,10 +125,6 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
 
         pipeline.addLast( "stomp-message-encoder", new StompMessageEncoder() );
         pipeline.addLast( "stomp-message-decoder", new StompMessageDecoder( ServerStompMessageFactory.INSTANCE ) );
-
-        if (this.executionHandler != null) {
-            pipeline.addLast( "stomp-server-send-threading", this.executionHandler );
-        }
 
         pipeline.addLast( "stomp-server-send", new SendHandler( provider, context ) );
     }
