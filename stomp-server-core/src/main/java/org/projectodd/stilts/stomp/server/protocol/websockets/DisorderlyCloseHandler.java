@@ -17,10 +17,17 @@ public class DisorderlyCloseHandler extends SimpleChannelUpstreamHandler {
 
         if (cause instanceof IOException ) {
             if (ctx.getAttachment() == null) {
-            	log.warn("disconnect channel and send DisorderlyCloseEvent upstream due to IOException: ", cause);
+            	String exceptionMessage = cause.getMessage();
                 ctx.setAttachment( Boolean.TRUE );
                 ctx.sendUpstream( new DisorderlyCloseEvent( ctx.getChannel() ) );
                 ctx.getChannel().disconnect();
+            	if (exceptionMessage != null && exceptionMessage.contains("reset by peer")) {
+            		log.info(ctx.getChannel() + " connection reset by peer. disconnect channel and send "
+            				+ "DisorderlyCloseEvent upstream.");
+            	} else {
+                	log.warn(ctx.getChannel() + "disconnect channel and send DisorderlyCloseEvent upstream due to "
+                			+ "IOException: ", cause);            		
+            	}
             }
         } else {
             ctx.sendUpstream( e );
