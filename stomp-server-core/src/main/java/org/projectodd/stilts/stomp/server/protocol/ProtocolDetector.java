@@ -94,7 +94,7 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
 
         pipeline.remove( this );
         
-        pipeline.addLast( "disorderly-close", new DisorderlyCloseHandler() );
+        pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
 
         pipeline.addLast( "stomp-frame-encoder", new StompFrameEncoder() );
         pipeline.addLast( "stomp-frame-decoder", new StompFrameDecoder() );
