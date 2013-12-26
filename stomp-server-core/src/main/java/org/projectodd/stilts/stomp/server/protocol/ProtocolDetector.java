@@ -13,7 +13,6 @@ import org.jboss.netty.handler.codec.http.HttpServerCodec;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.jboss.netty.handler.codec.replay.VoidEnum;
 import org.jboss.netty.handler.execution.ExecutionHandler;
-import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.projectodd.stilts.stomp.protocol.StompFrameDecoder;
 import org.projectodd.stilts.stomp.protocol.StompFrameEncoder;
@@ -95,7 +94,7 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
 
         pipeline.remove( this );
         
-        pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
+        pipeline.addLast( "disorderly-close", new DisorderlyCloseHandler() );
 
         pipeline.addLast( "stomp-frame-encoder", new StompFrameEncoder() );
         pipeline.addLast( "stomp-frame-decoder", new StompFrameDecoder() );
@@ -103,10 +102,6 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
         ConnectionContext context = new DefaultConnectionContext();
 
         pipeline.addLast( "stomp-disorderly-close-handler", new StompDisorderlyCloseHandler( provider, context ) );
-        
-        if (this.executionHandler != null) {
-            pipeline.addLast( "stomp-threading", this.executionHandler );
-        }
 
         pipeline.addLast( "stomp-server-connect", new ConnectHandler( provider, context ) );
         pipeline.addLast( "stomp-server-disconnect", new DisconnectHandler( provider, context ) );
@@ -125,6 +120,10 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
 
         pipeline.addLast( "stomp-message-encoder", new StompMessageEncoder() );
         pipeline.addLast( "stomp-message-decoder", new StompMessageDecoder( ServerStompMessageFactory.INSTANCE ) );
+
+        if (this.executionHandler != null) {
+            pipeline.addLast( "stomp-server-send-threading", this.executionHandler );
+        }
 
         pipeline.addLast( "stomp-server-send", new SendHandler( provider, context ) );
     }
