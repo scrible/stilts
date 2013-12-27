@@ -40,7 +40,7 @@ public class FrameHeader {
     }
     
     public boolean isContentFrame() {
-        return this.command.hasContent();
+        return this.command != null && this.command.hasContent();
     }
 
     public void setCommand(Command command) {
