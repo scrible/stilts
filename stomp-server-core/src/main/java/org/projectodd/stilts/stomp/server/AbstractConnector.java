@@ -37,6 +37,11 @@ public abstract class AbstractConnector implements Connector {
     protected ServerBootstrap createServerBootstrap() throws Exception {
         ServerBootstrap bootstrap = new ServerBootstrap( createChannelFactory() );
         bootstrap.setOption( "reuseAddress", true );
+        bootstrap.setOption( "backlog", 100 );
+        bootstrap.setOption( "trafficClass", 8 );
+        bootstrap.setOption( "child.keepAlive", true );
+        bootstrap.setOption( "child.trafficClass", 8 );
+        bootstrap.setOption( "child.tcpNoDelay", true );
         bootstrap.setPipelineFactory( getChannelPipelineFactory() );
         return bootstrap;
     }
