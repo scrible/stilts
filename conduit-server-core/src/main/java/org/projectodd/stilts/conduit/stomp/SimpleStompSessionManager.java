@@ -1,7 +1,5 @@
 package org.projectodd.stilts.conduit.stomp;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.projectodd.stilts.conduit.spi.StompSessionManager;
@@ -19,7 +17,7 @@ public class SimpleStompSessionManager implements StompSessionManager {
     @Override
     public StompSession createSession() throws StompException {
         SimpleStompSession session = new SimpleStompSession( getNextSessionId() );
-        this.sessions.put( session.getId(), session );
+//      this.sessions.put( session.getId(), session );
         return session;
     }
     
@@ -28,6 +26,6 @@ public class SimpleStompSessionManager implements StompSessionManager {
     }
     
     private AtomicLong counter = new AtomicLong();
-    private Map<String, SimpleStompSession> sessions = new HashMap<String,SimpleStompSession>();
+//  private Map<String, SimpleStompSession> sessions = new HashMap<String,SimpleStompSession>();
 
 }
