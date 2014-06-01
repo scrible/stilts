@@ -16,9 +16,6 @@
 
 package org.projectodd.stilts.stomplet.container;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
@@ -89,7 +86,7 @@ public class StompletMessageConduit implements MessageConduit {
         }
 
         Subscription subscription = activator.subscribe( this, subscriptionId, destination, headers );
-        this.subscriptions.put( subscriptionId, subscription );
+        //this.subscriptions.put( subscriptionId, subscription );
         return subscription;
     }
 
@@ -97,6 +94,6 @@ public class StompletMessageConduit implements MessageConduit {
     private StompletContainer stompletContainer;
     private AcknowledgeableMessageSink messageSink;
     private StompSession session;
-    private Map<String, Subscription> subscriptions = new HashMap<String, Subscription>();
+    //private Map<String, Subscription> subscriptions = new HashMap<String, Subscription>();
 
 }
