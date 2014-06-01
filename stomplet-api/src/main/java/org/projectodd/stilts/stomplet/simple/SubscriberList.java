@@ -20,12 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.jboss.logging.Logger;
 import org.projectodd.stilts.stomp.StompException;
 import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomplet.Subscriber;
 
 public class SubscriberList {
 
+    private static Logger log = Logger.getLogger(SubscriberList.class);
+    
     public SubscriberList() {
     }
 
@@ -43,7 +46,12 @@ public class SubscriberList {
 
     protected synchronized void sendToAllSubscribers(StompMessage message) throws StompException {
         for (Subscriber each : this.subscribers) {
-            each.send( message );
+        	try {
+        		each.send( message );
+        	} catch (StompException se) {
+        		log.warn("다음 subscriber에게 메시지를 전달하는 중 예외가 발생하였습니다. subscriber: " + each, se);
+        		removeSubscriber(each);
+        	}
         }
     }
 

@@ -39,6 +39,10 @@ public class ChannelMessageSink implements TransactionalAcknowledgeableMessageSi
         if (acknowledger != null) {
             this.ackManager.registerAcknowledger( message.getId(), acknowledger );
         }
+        // 알수 없는 이유로 channel writable 하지 않다면 예외를 발생시킨다
+        if (!this.channel.isWritable()) {
+        	throw new StompException("channel is not writable! channel: " + this.channel);
+        }
         this.channel.write( message );
     }
     
