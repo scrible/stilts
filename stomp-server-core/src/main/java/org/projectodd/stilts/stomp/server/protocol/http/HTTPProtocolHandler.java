@@ -131,9 +131,10 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
 
         WrappedConnectionContext context = new WrappedConnectionContext();
 
-        //pipeline.addLast( "head", new SimpleChannelUpstreamHandler() );
         pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
         
+        pipeline.addLast( "head", new SimpleChannelUpstreamHandler() );
+
         pipeline.addLast( "host-decoding-handling", new HostDecodingHandler() );
         pipeline.addLast( "longpoll-connector", new ConnectionResumeHandler( connectionManager, context ) );
 
