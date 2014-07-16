@@ -108,6 +108,14 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
+  
+  <distributionManagement>
+	<repository>
+	  <id>azar.repo.release</id>
+	  <name>Azar Release Repository</name>
+	  <url>https://test.azarlive.com/nexus/content/repositories/thirdparty/</url>
+	</repository>
+  </distributionManagement>
 
   <profiles>
     <profile>
