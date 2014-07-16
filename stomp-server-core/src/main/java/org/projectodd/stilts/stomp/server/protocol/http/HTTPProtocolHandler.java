@@ -88,6 +88,7 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
         boolean secure = (pipeline.get( SslHandler.class ) != null);
 
         pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
+        
         pipeline.addLast( "http-encoder", new HttpResponseEncoder() );
         pipeline.addLast( "http-decoder", new HttpRequestDecoder() );
         pipeline.addLast( "websocket-handshake", new ServerHandshakeHandler( secure ) );
@@ -130,7 +131,9 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
 
         WrappedConnectionContext context = new WrappedConnectionContext();
 
-        pipeline.addLast( "head", new SimpleChannelUpstreamHandler() );
+        //pipeline.addLast( "head", new SimpleChannelUpstreamHandler() );
+        pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
+        
         pipeline.addLast( "host-decoding-handling", new HostDecodingHandler() );
         pipeline.addLast( "longpoll-connector", new ConnectionResumeHandler( connectionManager, context ) );
 
