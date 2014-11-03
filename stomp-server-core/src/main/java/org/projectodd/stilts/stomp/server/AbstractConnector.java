@@ -38,9 +38,11 @@ public abstract class AbstractConnector implements Connector {
         ServerBootstrap bootstrap = new ServerBootstrap( createChannelFactory() );
         bootstrap.setOption( "reuseAddress", true );
         bootstrap.setOption( "backlog", 100 );
-        bootstrap.setOption( "trafficClass", 8 );
-        bootstrap.setOption( "child.keepAlive", true );
-        bootstrap.setOption( "child.trafficClass", 8 );
+        bootstrap.setOption( "trafficClass", 0x18 );
+//		SSL을 사용하는 경우 memory leak 이 발생하는 것에 대해 임시조치적인 해결법
+//		broadcast에 해당하는 토픽(MATCHES)이 있으므로 keepAlive 없이도 비정상 종료된 세션을 감지하고 처리가 가능할 것임
+//      bootstrap.setOption( "child.keepAlive", true );
+        bootstrap.setOption( "child.trafficClass", 0x18 );
         bootstrap.setOption( "child.tcpNoDelay", true );
         bootstrap.setPipelineFactory( getChannelPipelineFactory() );
         return bootstrap;
