@@ -40,7 +40,6 @@ import org.projectodd.stilts.stomp.server.protocol.UnsubscribeHandler;
 import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceHandler;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
-import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseHandler;
 import org.projectodd.stilts.stomp.server.protocol.websockets.ServerHandshakeHandler;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
@@ -86,8 +85,6 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
         pipeline.remove( "http-codec" );
 
         boolean secure = (pipeline.get( SslHandler.class ) != null);
-
-        pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
         
         pipeline.addLast( "http-encoder", new HttpResponseEncoder() );
         pipeline.addLast( "http-decoder", new HttpRequestDecoder() );
@@ -130,8 +127,6 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
         pipeline.remove( this );
 
         WrappedConnectionContext context = new WrappedConnectionContext();
-
-        pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
         
         pipeline.addLast( "head", new SimpleChannelUpstreamHandler() );
 

@@ -27,9 +27,9 @@ import org.jboss.netty.channel.DefaultChannelPipeline;
 import org.jboss.netty.handler.ssl.SslHandler;
 import org.projectodd.stilts.stomp.protocol.DebugHandler;
 import org.projectodd.stilts.stomp.server.protocol.http.ConnectionManager;
-import org.projectodd.stilts.stomp.server.protocol.http.FlashPolicyFileHandler;
 import org.projectodd.stilts.stomp.server.protocol.http.SinkManager;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
+import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseHandler;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
 public class StompServerPipelineFactory implements ChannelPipelineFactory {
@@ -44,7 +44,7 @@ public class StompServerPipelineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         
         DefaultChannelPipeline pipeline = new DefaultChannelPipeline();
-        pipeline.addFirst( "server-debug-header", new DebugHandler( "SERVER-HEAD" ) );
+        
         if (this.sslContext != null) {
             SSLEngine sslEngine = this.sslContext.createSSLEngine();
             sslEngine.setUseClientMode( false );
@@ -52,6 +52,9 @@ public class StompServerPipelineFactory implements ChannelPipelineFactory {
             sslHandler.setEnableRenegotiation( false );
             pipeline.addLast( "ssl", sslHandler );
         }
+        
+        pipeline.addLast( "disorderly-close", new DisorderlyCloseHandler() );
+        pipeline.addLast( "server-debug-header", new DebugHandler( "SERVER-HEAD" ) );
         //pipeline.addLast( "flash-policy-file-handler", new FlashPolicyFileHandler() );
         pipeline.addLast( "protocol-detector", new ProtocolDetector( this.connectionManager, this.sinkManager, this.provider, this.executor, this.resourceManager) );
         return pipeline;

@@ -25,7 +25,6 @@ import org.projectodd.stilts.stomp.server.protocol.http.HTTPProtocolHandler;
 import org.projectodd.stilts.stomp.server.protocol.http.OptionsHandler;
 import org.projectodd.stilts.stomp.server.protocol.http.SinkManager;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
-import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseHandler;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
 public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
@@ -93,8 +92,6 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
         ChannelPipeline pipeline = ctx.getPipeline();
 
         pipeline.remove( this );
-        
-        pipeline.addFirst( "disorderly-close", new DisorderlyCloseHandler() );
 
         pipeline.addLast( "stomp-frame-encoder", new StompFrameEncoder() );
         pipeline.addLast( "stomp-frame-decoder", new StompFrameDecoder() );
