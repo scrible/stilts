@@ -20,12 +20,15 @@ public class DisorderlyCloseHandler extends SimpleChannelUpstreamHandler {
             	String exceptionMessage = cause.getMessage();
                 ctx.setAttachment( Boolean.TRUE );
                 ctx.sendUpstream( new DisorderlyCloseEvent( ctx.getChannel() ) );
-                ctx.getChannel().disconnect();
+                ctx.getChannel().close();
             	if (exceptionMessage != null && exceptionMessage.contains("reset by peer")) {
-            		log.info(ctx.getChannel() + " connection reset by peer. disconnect channel and send "
+            		log.info(ctx.getChannel() + " connection reset by peer. close channel and send "
+            				+ "DisorderlyCloseEvent upstream.");
+            	} else if (exceptionMessage != null && exceptionMessage.contains("Connection timed out")) {
+            		log.info(ctx.getChannel() + " connection timed out. close channel and send "
             				+ "DisorderlyCloseEvent upstream.");
             	} else {
-                	log.warn(ctx.getChannel() + "disconnect channel and send DisorderlyCloseEvent upstream due to "
+                	log.warn(ctx.getChannel() + "close channel and send DisorderlyCloseEvent upstream due to "
                 			+ "IOException: ", cause);            		
             	}
             }
