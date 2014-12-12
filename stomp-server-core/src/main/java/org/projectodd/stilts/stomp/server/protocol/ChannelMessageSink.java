@@ -16,7 +16,10 @@
 
 package org.projectodd.stilts.stomp.server.protocol;
 
+import java.io.IOException;
+
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.DefaultExceptionEvent;
 import org.projectodd.stilts.stomp.StompException;
 import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.TransactionalAcknowledger;
@@ -39,14 +42,26 @@ public class ChannelMessageSink implements TransactionalAcknowledgeableMessageSi
         if (acknowledger != null) {
             this.ackManager.registerAcknowledger( message.getId(), acknowledger );
         }
-        // 알수 없는 이유로 channel writable 하지 않다면 예외를 발생시킨다
-        if (!this.channel.isWritable()) {
-        	throw new StompException("channel is not writable! channel: " + this.channel);
+
+        if (this.channel.isWritable()) {
+        	notWritableSince = Long.MAX_VALUE;
+        } else {
+        	// channel is not writable
+        	long now = System.currentTimeMillis();
+        	if (notWritableSince == Long.MAX_VALUE) {
+        		notWritableSince = now;
+        	} else if (now - notWritableSince >  TEN_SECONDS_MS) {
+        		IOException ioException = new IOException("channel is not writable for 10 seconds!");
+        		this.channel.getPipeline().sendUpstream(new DefaultExceptionEvent(channel, ioException));
+        	}
         }
         this.channel.write( message );
     }
     
     private Channel channel;
     private AckManager ackManager;
+    private long notWritableSince = Long.MAX_VALUE;
+    
+    private static long TEN_SECONDS_MS = 10 * 1000;
     
 }
