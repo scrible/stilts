@@ -4,6 +4,7 @@ import org.jboss.logging.Logger;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseEvent;
+import org.projectodd.stilts.stomp.spi.StompConnection;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
 public class StompDisorderlyCloseHandler extends AbstractProviderHandler {
@@ -17,11 +18,15 @@ public class StompDisorderlyCloseHandler extends AbstractProviderHandler {
     @Override
     public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception {
         if (e instanceof DisorderlyCloseEvent) {
-        	log.warn("handle disorderly closed channel: " + e.getChannel());
-            getContext().getStompConnection().disconnect();
+            log.warn("handle disorderly closed channel: " + e.getChannel());
+            StompConnection stompConnection = getStompConnection();
+            if (stompConnection != null) {
+                stompConnection.disconnect();
+            }
+            getContext().setActive(false);
             ctx.getChannel().close();
         } else {
-            super.handleUpstream( ctx, e );
+            super.handleUpstream(ctx, e);
         }
     }
 
