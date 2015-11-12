@@ -10,7 +10,7 @@
 
   <groupId>org.projectodd.stilts</groupId>
   <artifactId>stilts</artifactId>
-  <version>0.1.40-AZAR</version>
+  <version>0.1.40-AZAR2</version>
   <packaging>pom</packaging>
   <name>Stilts</name>
   <url>http://www.jboss.org/</url>
@@ -18,13 +18,6 @@
   <description>
     Stilts: The abstract STOMP server project.
   </description>
-
-  <scm>
-    <connection>scm:git:git://github.com/projectodd/stilts.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/projectodd/stilts.git</developerConnection>
-    <url>${stilts.scm.url}</url>
-    <tag>0.1.40</tag>
-  </scm>
 
   <developers>
     <developer>
@@ -488,8 +481,10 @@
     <module>stomp-api</module>
     <module>stomp-common</module>
     <module>stomp-client</module>
+<!-- 
     <module>stomp-client-js</module>
     <module>stomp-client-rb</module>
+ -->
     <module>stomp-server-spi</module>
     <module>stomp-server-core</module>
     <module>conduit-server-spi</module>

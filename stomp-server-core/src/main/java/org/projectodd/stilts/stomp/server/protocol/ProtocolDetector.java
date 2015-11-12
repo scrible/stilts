@@ -57,8 +57,12 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
             ChannelBuffer fullBuffer = buffer.readBytes( super.actualReadableBytes() );
             if (line.startsWith( "CONNECT" ) || line.startsWith( "STOMP" )) {
                 switchToPureStomp( context );
-            } else {
+            } else if (line.startsWith( "GET" ) || line.startsWith( "POST" )) {
                 switchToHttp( context );
+            } else {
+                log.errorf("cannot determin protocol! first line: [%.100s]", line);
+                context.getPipeline().remove( this );
+                channel.close();
             }
 
             // We want to restart at the entire head of the pipeline,
@@ -125,7 +129,6 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
         pipeline.addLast( "stomp-server-send", new SendHandler( provider, context ) );
     }
 
-    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger( "org.projectodd.stilts.stomp.server.protocol" );
     private static final Charset UTF_8 = Charset.forName( "UTF-8" );
 

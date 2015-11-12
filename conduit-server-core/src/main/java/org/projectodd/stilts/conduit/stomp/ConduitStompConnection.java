@@ -18,6 +18,10 @@ package org.projectodd.stilts.conduit.stomp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
@@ -36,6 +40,7 @@ import org.projectodd.stilts.stomp.StompException;
 import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.Subscription;
 import org.projectodd.stilts.stomp.protocol.StompFrame.Version;
+import org.projectodd.stilts.stomp.server.protocol.HeartbeatRunnable;
 import org.projectodd.stilts.stomp.spi.StompConnection;
 import org.projectodd.stilts.stomp.spi.StompSession;
 import org.projectodd.stilts.stomp.spi.StompTransaction;
@@ -50,6 +55,13 @@ public class ConduitStompConnection implements StompConnection {
         this.messageConduit = messageConduit;
         this.version = version;
         this.heartbeat = hb;
+
+        if (this.heartbeat != null) {
+            int duration = hb.calculateDuration( hb.getServerSend(), hb.getClientReceive() );
+            if (duration != 0) {
+                heartbeatFuture = heartbeatMonitor.scheduleAtFixedRate( new HeartbeatRunnable( hb, this ), 0L, duration, TimeUnit.MILLISECONDS );
+            }
+        }
     }
 
     public Heartbeat getHeartbeat() {
@@ -200,6 +212,11 @@ public class ConduitStompConnection implements StompConnection {
 
     @Override
     public synchronized void disconnect() throws NotConnectedException {
+        if (heartbeatFuture != null) {
+            heartbeatFuture.cancel(false);
+            heartbeatFuture = null;
+        }
+
         for (StompTransaction each : this.namedTransactions.values()) {
             try {
                 each.abort();
@@ -231,6 +248,8 @@ public class ConduitStompConnection implements StompConnection {
 
     private Map<String, ConduitStompTransaction> namedTransactions = new HashMap<String, ConduitStompTransaction>();
 
+    private static final ScheduledExecutorService heartbeatMonitor = Executors.newScheduledThreadPool(4);
+    private ScheduledFuture<?> heartbeatFuture;
     private MessageConduit messageConduit;
     private ConduitStompProvider stompProvider;
     private Version version;
