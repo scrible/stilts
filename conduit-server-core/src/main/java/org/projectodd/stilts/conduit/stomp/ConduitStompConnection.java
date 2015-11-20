@@ -55,13 +55,6 @@ public class ConduitStompConnection implements StompConnection {
         this.messageConduit = messageConduit;
         this.version = version;
         this.heartbeat = hb;
-
-        if (this.heartbeat != null) {
-            int duration = hb.calculateDuration( hb.getServerSend(), hb.getClientReceive() );
-            if (duration != 0) {
-                heartbeatFuture = heartbeatMonitor.scheduleAtFixedRate( new HeartbeatRunnable( hb, this ), 0L, duration, TimeUnit.MILLISECONDS );
-            }
-        }
     }
 
     public Heartbeat getHeartbeat() {
@@ -212,9 +205,8 @@ public class ConduitStompConnection implements StompConnection {
 
     @Override
     public synchronized void disconnect() throws NotConnectedException {
-        if (heartbeatFuture != null) {
-            heartbeatFuture.cancel(false);
-            heartbeatFuture = null;
+        if (heartbeat != null) {
+            heartbeat.stop();;
         }
 
         for (StompTransaction each : this.namedTransactions.values()) {
@@ -248,8 +240,6 @@ public class ConduitStompConnection implements StompConnection {
 
     private Map<String, ConduitStompTransaction> namedTransactions = new HashMap<String, ConduitStompTransaction>();
 
-    private static final ScheduledExecutorService heartbeatMonitor = Executors.newScheduledThreadPool(4);
-    private ScheduledFuture<?> heartbeatFuture;
     private MessageConduit messageConduit;
     private ConduitStompProvider stompProvider;
     private Version version;

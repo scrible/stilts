@@ -1,7 +1,53 @@
 package org.projectodd.stilts.stomp;
 
+import org.jboss.logging.Logger;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Heartbeat {
+
+    private static final double TOLERANCE_PERCENTAGE = 0.05;
+    private static final Logger log = Logger.getLogger( Heartbeat.class );
+
+    public Heartbeat() {
+    }
+
+    public void start(final Runnable callback) {
+        final int duration = calculateDuration(serverSend, clientReceive);
+        log.debugf("heartbeat duration: %d", duration);
+        if (duration > 0) {
+            future = heartbeatScheduler.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    long now = System.currentTimeMillis();
+                    long lastUpdate = getLastUpdate();
+                    long diff = now - lastUpdate;
+                    double tolerance = duration * TOLERANCE_PERCENTAGE;
+
+                    if (diff > duration - tolerance) {
+                        log.tracef("HEARTBEAT : %s / %s", diff, duration);
+                        try {
+                            callback.run();
+                        } catch (Exception e) {
+                            log.error("Could not send heartbeat message:", e);
+                        }
+                        touch();
+                    }
+                    long targetDelay = lastUpdate + duration - now;
+                    future = heartbeatScheduler.schedule(this, targetDelay, TimeUnit.MILLISECONDS);
+                }
+            }, duration, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    public void stop() {
+        if (future != null) {
+            future.cancel(false);
+        }
+    }
 
     public int calculateDuration(int senderDuration, int receiverDuration) {
         if (senderDuration == 0 || receiverDuration == 0) {
@@ -50,10 +96,15 @@ public class Heartbeat {
         lastUpdate = System.currentTimeMillis();
     }
 
+    public Future<?> getFuture() {
+        return future;
+    }
+
     private int clientSend;
     private int clientReceive;
     private int serverSend = 1000;
     private int serverReceive = 1000;
     private long lastUpdate = System.currentTimeMillis();
-
+    private Future<?> future;
+    private static final ScheduledExecutorService heartbeatScheduler = Executors.newScheduledThreadPool(4);
 }
