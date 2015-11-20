@@ -37,13 +37,17 @@ public class Heartbeat {
                         touch();
                     }
                     long targetDelay = lastUpdate + duration - now;
-                    future = heartbeatScheduler.schedule(this, targetDelay, TimeUnit.MILLISECONDS);
+                    if (!stopped) {
+                        future = heartbeatScheduler.schedule(this, targetDelay, TimeUnit.MILLISECONDS);
+                    }
                 }
             }, duration, TimeUnit.MILLISECONDS);
         }
     }
 
     public void stop() {
+        stopped = true;
+        Future<?> future = this.future;
         if (future != null) {
             future.cancel(false);
         }
@@ -105,6 +109,7 @@ public class Heartbeat {
     private int serverSend = 1000;
     private int serverReceive = 1000;
     private long lastUpdate = System.currentTimeMillis();
-    private Future<?> future;
+    private volatile boolean stopped = false;
+    private volatile Future<?> future;
     private static final ScheduledExecutorService heartbeatScheduler = Executors.newScheduledThreadPool(4);
 }
