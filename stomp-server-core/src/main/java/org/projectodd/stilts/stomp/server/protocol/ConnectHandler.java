@@ -16,12 +16,19 @@
 
 package org.projectodd.stilts.stomp.server.protocol;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.logging.Logger;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.Channels;
 import org.projectodd.stilts.stomp.Headers;
 import org.projectodd.stilts.stomp.Heartbeat;
 import org.projectodd.stilts.stomp.StompException;
@@ -36,6 +43,8 @@ import org.projectodd.stilts.stomp.spi.StompProvider;
 import org.projectodd.stilts.stomp.spi.TransactionalAcknowledgeableMessageSink;
 
 public class ConnectHandler extends AbstractControlFrameHandler {
+
+    public static final ChannelBuffer HEARTBEAT_BYTES = ChannelBuffers.copiedBuffer(new byte[] { 10 });
 
     public ConnectHandler(StompProvider server, ConnectionContext context) {
         super( server, context, Command.CONNECT );
@@ -58,6 +67,15 @@ public class ConnectHandler extends AbstractControlFrameHandler {
         try {
             Version version = checkVersion( frame );
             Heartbeat hb = checkHeartbeat( frame, version );
+            if (hb != null) {
+                final Channel channel = channelContext.getPipeline().getChannel();
+                hb.start(new Runnable() {
+                    @Override
+                    public void run() {
+                        Channels.write(channel, HEARTBEAT_BYTES);
+                    }
+                });
+            }
             Headers headers = frame.getHeaders();
             String hostHeader = headers.get( Header.HOST );
 
@@ -114,8 +132,9 @@ public class ConnectHandler extends AbstractControlFrameHandler {
             String[] components = heartBeat.split( "," );
             try {
                 hb = new Heartbeat();
-                hb.setClientReceive( Integer.parseInt( components[0] ) );
-                hb.setClientSend( Integer.parseInt( components[1] ) );
+                hb.setClientSend( Integer.parseInt( components[0] ) );
+                hb.setClientReceive( Integer.parseInt( components[1] ) );
+                log.infof("client heartbeat config: %s,%s", components[0], components[1]);
             } catch (Exception ex) {
                 throw new StompException( "Heartbeat values must be integers." );
             }
