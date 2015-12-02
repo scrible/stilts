@@ -106,7 +106,7 @@
 	<repository>
 	  <id>azar.repo.release</id>
 	  <name>Azar Release Repository</name>
-	  <url>https://test.azarlive.com/nexus/content/repositories/thirdparty/</url>
+	  <url>https://test.evilraza.com/nexus/content/repositories/thirdparty/</url>
 	</repository>
   </distributionManagement>
 
