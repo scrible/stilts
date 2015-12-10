@@ -1,9 +1,9 @@
 package org.projectodd.stilts.stomplet.container.xa;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.transaction.xa.XAResource;
 
@@ -79,6 +79,6 @@ public class PseudoXAStomplet implements XAStomplet {
     private PseudoXAStompletResourceManager resourceManager;
     private Set<XAResource> xaResources;
 
-    private Map<String, Subscriber> subscribers = new HashMap<String, Subscriber>();
+    private Map<String, Subscriber> subscribers = new ConcurrentHashMap<String, Subscriber>();
 
 }
