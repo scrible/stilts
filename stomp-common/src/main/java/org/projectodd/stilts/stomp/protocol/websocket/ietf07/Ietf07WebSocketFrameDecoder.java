@@ -13,7 +13,7 @@ import org.projectodd.stilts.stomp.protocol.websocket.WebSocketFrame.FrameType;
 
 public class Ietf07WebSocketFrameDecoder extends ReplayingDecoder<VoidEnum> {
 
-    public static final int DEFAULT_MAX_FRAME_SIZE = 16384;
+    public static final int DEFAULT_MAX_FRAME_SIZE = 256*1024;
 
     private final int maxFrameSize;
 
