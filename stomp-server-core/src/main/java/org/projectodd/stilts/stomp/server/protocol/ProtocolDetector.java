@@ -57,7 +57,7 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
             ChannelBuffer fullBuffer = buffer.readBytes( super.actualReadableBytes() );
             if (line.startsWith( "CONNECT" ) || line.startsWith( "STOMP" )) {
                 switchToPureStomp( context );
-            } else if (line.startsWith( "GET" ) || line.startsWith( "POST" )) {
+            } else if (line.startsWith( "GET" ) || line.startsWith( "POST" ) || line.startsWith( "OPTIONS" )) {
                 switchToHttp( context );
             } else {
                 log.errorf("cannot determin protocol! first line: [%.100s]", line);
