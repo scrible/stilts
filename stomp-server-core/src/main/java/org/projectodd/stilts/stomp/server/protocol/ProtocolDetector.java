@@ -86,7 +86,7 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
         ChannelPipeline pipeline = ctx.getPipeline();
 
         pipeline.remove( this );
-        pipeline.addLast( "http-codec", new HttpServerCodec() );
+        pipeline.addLast( "http-codec", new HttpServerCodec(16*1024, 16*1024, 256*1024) );
         pipeline.addLast( "cors-handler", new CORSHandler() );
         pipeline.addLast( "options-handler", new OptionsHandler() );
         pipeline.addLast( "http-handler", new HTTPProtocolHandler( provider, executionHandler, connectionManager, sinkManager, resourceManager ) );
