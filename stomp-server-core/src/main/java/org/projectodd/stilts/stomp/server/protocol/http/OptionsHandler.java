@@ -41,6 +41,12 @@ public class OptionsHandler extends SimpleChannelUpstreamHandler {
             if (httpReq.getMethod().equals( HttpMethod.OPTIONS )) {
                 HttpResponse httpResp = new DefaultHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.OK );
                 httpResp.setHeader( "Allow", "OPTIONS,POST,GET" );
+                String origin = httpReq.getHeader( "Origin" );
+                if(origin != null) httpResp.setHeader( "Access-Control-Allow-Origin", origin );
+                httpResp.setHeader( "Access-Control-Allow-Methods", "OPTIONS,POST,GET" );
+                httpResp.setHeader( "Access-Control-Allow-Headers", "Accept, Content-Type" );
+                httpResp.setHeader( "Access-Control-Allow-Credentials", "true" );
+
                 httpResp.setHeader( "Content-Length", "0" );
                 ctx.getChannel().write( httpResp );
                 return;

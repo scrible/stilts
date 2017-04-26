@@ -27,6 +27,7 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.protocol.StompFrame;
 import org.projectodd.stilts.stomp.protocol.StompFrame.Command;
 
@@ -40,7 +41,7 @@ public class HttpResponder implements ChannelUpstreamHandler {
     public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception {
         if (e instanceof MessageEvent && ((MessageEvent) e).getMessage() instanceof StompFrame) {
             StompFrame frame = (StompFrame) ((MessageEvent) e).getMessage();
-            if (frame.getCommand() != Command.CONNECT) {
+            if (frame.getCommand() != Command.CONNECT && frame.getCommand() != Command.SUBSCRIBE) {
                 HttpResponse httpResp = new DefaultHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT );
                 httpResp.setHeader( "Content-Length", "0" );
                 ctx.sendDownstream( new DownstreamMessageEvent( ctx.getChannel(), Channels.future( ctx.getChannel() ), httpResp, ctx.getChannel().getRemoteAddress() ) );
@@ -48,7 +49,17 @@ public class HttpResponder implements ChannelUpstreamHandler {
             }
         }
 
+
         ctx.sendUpstream( e );
+        //HACK: POST of messages aren't responding/closing the connection to browser
+        //Trying to do that here...
+        if (e instanceof MessageEvent && ((MessageEvent) e).getMessage() instanceof StompMessage) {
+            HttpResponse httpResp = new DefaultHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT );
+            httpResp.setHeader( "Content-Length", "0" );
+            //NOTE: CORS headers should be added by downstream CORSHandler
+            ctx.sendDownstream( new DownstreamMessageEvent( ctx.getChannel(), Channels.future( ctx.getChannel() ), httpResp, ctx.getChannel().getRemoteAddress() ) );
+            return;
+        }
     }
 
     @SuppressWarnings("unused")
