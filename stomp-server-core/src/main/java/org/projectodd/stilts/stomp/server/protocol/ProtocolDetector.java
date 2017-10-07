@@ -129,6 +129,7 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
         pipeline.addLast( "stomp-server-send", new SendHandler( provider, context ) );
     }
 
+    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger( "org.projectodd.stilts.stomp.server.protocol" );
     private static final Charset UTF_8 = Charset.forName( "UTF-8" );
 

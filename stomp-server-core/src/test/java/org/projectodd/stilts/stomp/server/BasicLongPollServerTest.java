@@ -60,6 +60,13 @@ public class BasicLongPollServerTest extends AbstractStompServerTestCase<MockSto
 
         Thread.sleep( 200 );
 
+        send("SEND",
+                "destination:/ping",
+                "content-length:18",
+                "",
+                "{\"msgType\":\"ping\"}");
+
+        Thread.sleep( 200 );
         send( "SUBSCRIBE",
                 "id: 2",
                 "destination: /bar" );

@@ -40,6 +40,7 @@ import org.projectodd.stilts.stomp.server.protocol.UnsubscribeHandler;
 import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceHandler;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
+import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseHandler;
 import org.projectodd.stilts.stomp.server.protocol.websockets.ServerHandshakeHandler;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
@@ -124,11 +125,11 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
 
     protected void switchToRequestOriented(ChannelHandlerContext ctx) {
         ChannelPipeline pipeline = ctx.getPipeline();
-        pipeline.remove( this );
 
         WrappedConnectionContext context = new WrappedConnectionContext();
-        
+
         pipeline.addLast( "head", new SimpleChannelUpstreamHandler() );
+        pipeline.remove( this );
 
         pipeline.addLast( "host-decoding-handling", new HostDecodingHandler() );
         pipeline.addLast( "longpoll-connector", new ConnectionResumeHandler( connectionManager, context ) );

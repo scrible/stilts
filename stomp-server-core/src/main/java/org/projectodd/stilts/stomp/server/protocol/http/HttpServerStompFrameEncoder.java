@@ -14,6 +14,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.projectodd.stilts.stomp.protocol.StompControlFrame;
 import org.projectodd.stilts.stomp.protocol.StompFrame;
 import org.projectodd.stilts.stomp.protocol.StompFrameCodec;
 
@@ -49,11 +50,19 @@ public class HttpServerStompFrameEncoder extends OneToOneEncoder implements Chan
             } else {
                 log.debug( "encore for NOT_STREAM" );
                 ChannelBuffer buffer = StompFrameCodec.INSTANCE.encode( (StompFrame) msg );
-                HttpResponse httpResp = new DefaultHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.OK );
-                httpResp.setContent( buffer );
-                httpResp.setHeader( "Content-Length", "" + buffer.readableBytes() );
-                httpResp.setHeader( "Content-Type", "text/stomp" );
-                return httpResp;
+                if(msg instanceof StompControlFrame) {
+                    HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT);
+                    httpResp.setHeader("Content-Length", 0);
+                    httpResp.setHeader("Content-Type", "text/stomp");
+                    return httpResp;
+
+                } else {
+                    HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                    httpResp.setContent(buffer);
+                    httpResp.setHeader("Content-Length", "" + buffer.readableBytes());
+                    httpResp.setHeader("Content-Type", "text/stomp");
+                    return httpResp;
+                }
             }
         }
         return msg;
