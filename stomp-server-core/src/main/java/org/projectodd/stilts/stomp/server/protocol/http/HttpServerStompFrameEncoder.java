@@ -50,20 +50,11 @@ public class HttpServerStompFrameEncoder extends OneToOneEncoder implements Chan
             } else {
                 log.debug( "encore for NOT_STREAM" );
                 ChannelBuffer buffer = StompFrameCodec.INSTANCE.encode( (StompFrame) msg );
-                if(msg instanceof StompControlFrame) {
-                    HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT);
-                    httpResp.setHeader("Content-Length", 0);
-                    httpResp.setHeader("Content-Type", "text/stomp");
-                    return httpResp;
-
-                } else {
-                    HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                    httpResp.setContent(buffer);
-                    httpResp.setHeader("Content-Length", "" + buffer.readableBytes());
-                    httpResp.setHeader("Content-Type", "text/stomp");
-                    return httpResp;
-                }
-            }
+                HttpResponse httpResp = new DefaultHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.OK );
+                httpResp.setContent( buffer );
+                httpResp.setHeader( "Content-Length", "" + buffer.readableBytes() );
+                httpResp.setHeader( "Content-Type", "text/stomp" );
+                return httpResp;            }
         }
         return msg;
     }

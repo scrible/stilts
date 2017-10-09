@@ -23,6 +23,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.projectodd.stilts.stomp.protocol.StompControlFrame;
+import org.projectodd.stilts.stomp.protocol.StompFrame;
 import org.projectodd.stilts.stomp.server.protocol.ConnectHandler;
 import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 import org.projectodd.stilts.stomp.spi.StompProvider;
@@ -41,17 +42,13 @@ public class HttpConnectHandler extends ConnectHandler {
         return sink;
     }
 
-    public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception {
-        if(e instanceof UpstreamMessageEvent) {
-            UpstreamMessageEvent upEvent = (UpstreamMessageEvent) e;
-            if(upEvent.getMessage() instanceof StompControlFrame) {
-                HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT);
-                httpResp.setHeader("Content-Length", 0);
-                httpResp.setHeader("Content-Type", "text/stomp");
-                ctx.sendDownstream( new DownstreamMessageEvent( ctx.getChannel(), Channels.future( ctx.getChannel() ), httpResp, ctx.getChannel().getRemoteAddress() ) );
-            }
-        }
-        super.handleUpstream(ctx, e);
+    public void handleControlFrame(ChannelHandlerContext channelContext, StompFrame frame) {
+        super.handleControlFrame(channelContext, frame);
+
+        HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT);
+        httpResp.setHeader("Content-Length", 0);
+        httpResp.setHeader("Content-Type", "text/stomp");
+        channelContext.sendDownstream(new DownstreamMessageEvent(channelContext.getChannel(), Channels.future(channelContext.getChannel()), httpResp, channelContext.getChannel().getRemoteAddress()));
     }
 
     @SuppressWarnings("unused")

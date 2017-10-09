@@ -32,6 +32,8 @@ public class SSESinkHandler extends SimpleChannelUpstreamHandler {
                 this.provided = true;
                 HttpResponse httpResp = new DefaultHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.OK );
                 httpResp.setHeader( "Content-Type", "text/event-stream" );
+                httpResp.setHeader("Cache-Control","no-cache");
+                httpResp.setHeader("X-Accel-Buffering","no");
                 ctx.getChannel().write( httpResp );
             }
         }
