@@ -17,12 +17,7 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
 import org.jboss.logging.Logger;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelUpstreamHandler;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.DownstreamMessageEvent;
-import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -40,13 +35,23 @@ public class HttpResponder implements ChannelUpstreamHandler {
     @Override
     public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception {
         if (e instanceof MessageEvent && ((MessageEvent) e).getMessage() instanceof StompFrame) {
-            StompFrame frame = (StompFrame) ((MessageEvent) e).getMessage();
-            if (frame.getCommand() != Command.CONNECT) {
+            final StompFrame frame = (StompFrame) ((MessageEvent) e).getMessage();
+            if (frame.getCommand() != Command.CONNECT && frame.getCommand() != Command.DISCONNECT) {
                 HttpResponse httpResp = new DefaultHttpResponse( HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT );
                 httpResp.setHeader( "Content-Length", "0" );
-                ctx.sendDownstream( new DownstreamMessageEvent( ctx.getChannel(), Channels.future( ctx.getChannel() ), httpResp, ctx.getChannel().getRemoteAddress() ) );
+                ChannelFuture future = Channels.future(ctx.getChannel());
+                ctx.sendDownstream(new DownstreamMessageEvent(ctx.getChannel(), future, httpResp, ctx.getChannel().getRemoteAddress()));
+                ctx.getChannel().close();
                 return;
             }
+        } else if (e instanceof MessageEvent && ((MessageEvent) e).getMessage() instanceof StompMessage) {
+            //Send a response for messages
+            HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NO_CONTENT);
+            httpResp.setHeader("Content-Length", "0");
+            final StompMessage msg = (StompMessage) ((MessageEvent) e).getMessage();
+            ChannelFuture future = Channels.future(ctx.getChannel());
+            ctx.sendDownstream(new DownstreamMessageEvent(ctx.getChannel(), future, httpResp, ctx.getChannel().getRemoteAddress()));
+            ctx.getChannel().close();
         }
 
 

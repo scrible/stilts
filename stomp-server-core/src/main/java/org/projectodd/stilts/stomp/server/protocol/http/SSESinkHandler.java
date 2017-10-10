@@ -5,12 +5,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.handler.codec.http.*;
 import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 
 public class SSESinkHandler extends SimpleChannelUpstreamHandler {
@@ -35,6 +30,7 @@ public class SSESinkHandler extends SimpleChannelUpstreamHandler {
                 httpResp.setHeader("Cache-Control","no-cache");
                 httpResp.setHeader("X-Accel-Buffering","no");
                 ctx.getChannel().write( httpResp );
+                //TODO: do I need to return here?
             }
         }
         if (!this.provided) {

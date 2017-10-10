@@ -1,15 +1,7 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map.Entry;
-
 import org.jboss.logging.Logger;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelUpstreamHandler;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
@@ -22,27 +14,15 @@ import org.projectodd.stilts.stomp.protocol.longpoll.HttpStompFrameDecoder;
 import org.projectodd.stilts.stomp.protocol.websocket.WebSocketStompFrameDecoder;
 import org.projectodd.stilts.stomp.protocol.websocket.WebSocketStompFrameEncoder;
 import org.projectodd.stilts.stomp.server.ServerStompMessageFactory;
-import org.projectodd.stilts.stomp.server.protocol.AbortHandler;
-import org.projectodd.stilts.stomp.server.protocol.AckHandler;
-import org.projectodd.stilts.stomp.server.protocol.BeginHandler;
-import org.projectodd.stilts.stomp.server.protocol.CommitHandler;
-import org.projectodd.stilts.stomp.server.protocol.ConnectHandler;
-import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
-import org.projectodd.stilts.stomp.server.protocol.DefaultConnectionContext;
-import org.projectodd.stilts.stomp.server.protocol.DisconnectHandler;
-import org.projectodd.stilts.stomp.server.protocol.HostDecodingHandler;
-import org.projectodd.stilts.stomp.server.protocol.NackHandler;
-import org.projectodd.stilts.stomp.server.protocol.ReceiptHandler;
-import org.projectodd.stilts.stomp.server.protocol.SendHandler;
-import org.projectodd.stilts.stomp.server.protocol.StompDisorderlyCloseHandler;
-import org.projectodd.stilts.stomp.server.protocol.SubscribeHandler;
-import org.projectodd.stilts.stomp.server.protocol.UnsubscribeHandler;
-import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
+import org.projectodd.stilts.stomp.server.protocol.*;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceHandler;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
-import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseHandler;
 import org.projectodd.stilts.stomp.server.protocol.websockets.ServerHandshakeHandler;
 import org.projectodd.stilts.stomp.spi.StompProvider;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Map.Entry;
 
 public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
 
@@ -143,7 +123,7 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
         pipeline.addLast( "DEBUG_A", new DebugHandler( "debug-a" ) );
 
         pipeline.addLast( "stomp-server-connect", new HttpConnectHandler( provider, context, sinkManager ) );
-        pipeline.addLast( "stomp-server-disconnect", new DisconnectHandler( provider, context, false ) );
+        pipeline.addLast("stomp-server-disconnect", new HttpDisconnectHandler(provider, context, false));
 
         pipeline.addLast( "stomp-server-subscribe", new SubscribeHandler( provider, context ) );
         pipeline.addLast( "stomp-server-unsubscribe", new UnsubscribeHandler( provider, context ) );
