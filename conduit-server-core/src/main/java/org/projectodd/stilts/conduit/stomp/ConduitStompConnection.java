@@ -16,34 +16,21 @@
 
 package org.projectodd.stilts.conduit.stomp;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import org.jboss.logging.Logger;
+import org.projectodd.stilts.conduit.spi.MessageConduit;
+import org.projectodd.stilts.stomp.*;
+import org.projectodd.stilts.stomp.protocol.StompFrame.Version;
+import org.projectodd.stilts.stomp.spi.StompConnection;
+import org.projectodd.stilts.stomp.spi.StompSession;
+import org.projectodd.stilts.stomp.spi.StompTransaction;
 
 import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-
-import org.jboss.logging.Logger;
-import org.projectodd.stilts.conduit.spi.MessageConduit;
-import org.projectodd.stilts.stomp.Acknowledger;
-import org.projectodd.stilts.stomp.Headers;
-import org.projectodd.stilts.stomp.Heartbeat;
-import org.projectodd.stilts.stomp.InvalidSubscriptionException;
-import org.projectodd.stilts.stomp.InvalidTransactionException;
-import org.projectodd.stilts.stomp.NotConnectedException;
-import org.projectodd.stilts.stomp.StompException;
-import org.projectodd.stilts.stomp.StompMessage;
-import org.projectodd.stilts.stomp.Subscription;
-import org.projectodd.stilts.stomp.protocol.StompFrame.Version;
-import org.projectodd.stilts.stomp.server.protocol.HeartbeatRunnable;
-import org.projectodd.stilts.stomp.spi.StompConnection;
-import org.projectodd.stilts.stomp.spi.StompSession;
-import org.projectodd.stilts.stomp.spi.StompTransaction;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConduitStompConnection implements StompConnection {
 
@@ -236,9 +223,9 @@ public class ConduitStompConnection implements StompConnection {
         return new ConduitStompTransaction( this, jtaTransaction, transactionId );
     }
 
-    private Map<String, Subscription> subscriptions = new HashMap<String, Subscription>();
+    private Map<String, Subscription> subscriptions = Collections.synchronizedMap(new HashMap<String, Subscription>());
 
-    private Map<String, ConduitStompTransaction> namedTransactions = new HashMap<String, ConduitStompTransaction>();
+    private Map<String, ConduitStompTransaction> namedTransactions = Collections.synchronizedMap(new HashMap<String, ConduitStompTransaction>());
 
     private MessageConduit messageConduit;
     private ConduitStompProvider stompProvider;
