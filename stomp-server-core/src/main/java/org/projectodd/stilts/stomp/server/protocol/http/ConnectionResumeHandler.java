@@ -1,26 +1,19 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
-import java.util.Random;
-import java.util.Set;
-
 import org.jboss.logging.Logger;
-import org.jboss.netty.channel.ChannelDownstreamHandler;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelUpstreamHandler;
-import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.Cookie;
 import org.jboss.netty.handler.codec.http.CookieDecoder;
-import org.jboss.netty.handler.codec.http.CookieEncoder;
-import org.jboss.netty.handler.codec.http.DefaultCookie;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
 import org.projectodd.stilts.stomp.server.protocol.DefaultConnectionContext;
-import org.projectodd.stilts.stomp.server.protocol.HostDecodedEvent;
 import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 import org.projectodd.stilts.stomp.server.protocol.websockets.SessionDecodedEvent;
+
+import java.net.URI;
+import java.util.Random;
+import java.util.Set;
 
 public class ConnectionResumeHandler implements ChannelUpstreamHandler, ChannelDownstreamHandler {
 
@@ -37,8 +30,33 @@ public class ConnectionResumeHandler implements ChannelUpstreamHandler, ChannelD
                 CookieDecoder cookieDecoder = new CookieDecoder();
                 ConnectionContext connectionContext = null;
 
+                //Rely on an HTTP header maintain the connection ID
                 HttpRequest httpReq = (HttpRequest) ((MessageEvent) e).getMessage();
+                String connectionIdHeader = httpReq.getHeader("X-Stomp-Connection-Id");
+                if (connectionIdHeader == null) {
+                    try {
+                        URI uri = new URI(httpReq.getUri());
+                        String query = uri.getQuery();
+                        if (query != null && query.length() > 0) {
+                            String[] paramsKVs = query.split("&");
+                            for (int i = 0; i < paramsKVs.length; i++) {
+                                String paramsKV = paramsKVs[i];
+                                if (paramsKV.startsWith("stompConnectionId=")) {
+                                    connectionIdHeader = paramsKV.substring("stompConnectionId=".length());
+                                }
+                            }
+                        }
+                    } catch (Exception ex) {
+                        //ignore failures to parse this silently
+                    }
+                }
+                if (connectionIdHeader != null) {
+                    this.connectionId = connectionIdHeader;
+                    connectionContext = this.connectionManager.get(connectionId);
+                }
+
                 String cookieHeader = httpReq.getHeader( "Cookie" );
+/*
                 if (cookieHeader != null) {
                     Set<Cookie> cookies = cookieDecoder.decode( cookieHeader );
                     for (Cookie cookie : cookies) {
@@ -49,6 +67,7 @@ public class ConnectionResumeHandler implements ChannelUpstreamHandler, ChannelD
                         }
                     }
                 }
+*/
 
                 if (connectionContext == null) {
                     connectionContext = new DefaultConnectionContext();
@@ -80,7 +99,9 @@ public class ConnectionResumeHandler implements ChannelUpstreamHandler, ChannelD
         if (e instanceof MessageEvent) {
             if (((MessageEvent) e).getMessage() instanceof HttpResponse) {
                 HttpResponse httpResp = (HttpResponse) ((MessageEvent) e).getMessage();
+                httpResp.setHeader("X-Stomp-Connection-Id", this.connectionId);
 
+/*
                 CookieEncoder cookieEncoder = new CookieEncoder( true );
                 String cookieHeader = httpResp.getHeader( "Set-Cookie" );
                 if (cookieHeader != null) {
@@ -94,6 +115,7 @@ public class ConnectionResumeHandler implements ChannelUpstreamHandler, ChannelD
                 Cookie connectionCookie = new DefaultCookie( "stomp-connection-id", this.connectionId );
                 cookieEncoder.addCookie( connectionCookie );
                 httpResp.setHeader( "Set-Cookie", cookieEncoder.encode() );
+*/
             }
         }
 

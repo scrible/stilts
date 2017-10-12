@@ -17,11 +17,7 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
 import org.jboss.logging.Logger;
-import org.jboss.netty.channel.ChannelDownstreamHandler;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 
@@ -50,7 +46,8 @@ public class CORSHandler extends SimpleChannelUpstreamHandler implements Channel
                 HttpResponse httpResp = (HttpResponse) ((MessageEvent) e).getMessage();
                 httpResp.setHeader( "Access-Control-Allow-Origin", this.origin );
                 httpResp.setHeader( "Access-Control-Allow-Methods", "OPTIONS,POST,GET" );
-                httpResp.setHeader( "Access-Control-Allow-Headers", "Accept, Content-Type" );
+                httpResp.setHeader("Access-Control-Allow-Headers", "Accept, Content-Type, X-Stomp-Connection-Id");
+                httpResp.setHeader("Access-Control-Expose-Headers", "X-Stomp-Connection-Id");
                 httpResp.setHeader( "Access-Control-Allow-Credentials", "true" );
             }
         }

@@ -28,9 +28,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ConduitStompConnection implements StompConnection {
 
@@ -206,7 +204,9 @@ public class ConduitStompConnection implements StompConnection {
 
         this.namedTransactions.clear();
 
-        for (Subscription each : this.subscriptions.values()) {
+        //create stable copy of values
+        Set<Subscription> values = new HashSet<Subscription>(this.subscriptions.values());
+        for (Subscription each : values) {
             try {
                 each.cancel();
             } catch (StompException e) {

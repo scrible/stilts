@@ -7,6 +7,8 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.execution.ExecutionHandler;
 import org.jboss.netty.handler.ssl.SslHandler;
+import org.jboss.netty.logging.InternalLogger;
+import org.jboss.netty.logging.InternalLoggerFactory;
 import org.projectodd.stilts.stomp.protocol.DebugHandler;
 import org.projectodd.stilts.stomp.protocol.StompMessageDecoder;
 import org.projectodd.stilts.stomp.protocol.StompMessageEncoder;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
+    private static final InternalLogger logger =
+            InternalLoggerFactory.getInstance(HTTPProtocolHandler.class.getName());
 
     public HTTPProtocolHandler(StompProvider provider, ExecutionHandler executionHandler, ConnectionManager connectionManager, SinkManager sinkManager, ResourceManager resourceManager) {
         this.provider = provider;
@@ -32,6 +36,16 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
         this.connectionManager = connectionManager;
         this.sinkManager = sinkManager;
         this.resourceManager = resourceManager;
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+        try {
+            logger.warn("Failure processing HTTP Protocol:", e.getCause());
+            ctx.getChannel().close();
+        } catch (Exception ex) {
+
+        }
     }
 
     @Override
