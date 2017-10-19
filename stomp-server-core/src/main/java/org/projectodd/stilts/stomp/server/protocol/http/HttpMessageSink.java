@@ -1,7 +1,5 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
-import java.util.LinkedList;
-
 import org.jboss.logging.Logger;
 import org.jboss.netty.channel.Channel;
 import org.projectodd.stilts.stomp.StompException;
@@ -9,6 +7,8 @@ import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.TransactionalAcknowledger;
 import org.projectodd.stilts.stomp.server.protocol.AckManager;
 import org.projectodd.stilts.stomp.spi.TransactionalAcknowledgeableMessageSink;
+
+import java.util.LinkedList;
 
 public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink {
 
@@ -35,28 +35,43 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
                 this.channel = null;
             }
         } else {
-            this.messages.add( message );
+            synchronized (this.messages) {
+                this.messages.add(message);
+            }
         }
     }
 
-    public synchronized void provideChannel(Channel channel, boolean single) {
+    public void provideChannel(Channel channel, boolean single) {
         log.debug( "someone provided a channel: " + channel );
 
-        if (single && !this.messages.isEmpty()) {
-            StompMessage message = messages.removeFirst();
-            channel.write( message );
-            return;
-        }
-
-        if (!single) {
-            for (StompMessage each : this.messages) {
-                channel.write( each );
+        synchronized (this.messages) {
+            if (single && !this.messages.isEmpty()) {
+                StompMessage message = messages.removeFirst();
+                channel.write(message);
+                return;
             }
-            this.messages.clear();
+
+            if (!single) {
+                for (StompMessage each : this.messages) {
+                    channel.write(each);
+                }
+                this.messages.clear();
+            }
         }
 
-        this.channel = channel;
-        this.single = single;
+        synchronized (this) {
+            this.channel = channel;
+            this.single = single;
+        }
+        //ensure no messages were queued while we were specifying the channel or else they won't get sent
+        synchronized (this.messages) {
+            if (!single) {
+                for (StompMessage each : this.messages) {
+                    channel.write(each);
+                }
+                this.messages.clear();
+            }
+        }
     }
 
     public synchronized void clearChannel() {
