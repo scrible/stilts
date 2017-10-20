@@ -194,7 +194,8 @@ public class ConduitStompConnection implements StompConnection {
             heartbeat.stop();;
         }
 
-        for (StompTransaction each : this.namedTransactions.values()) {
+        Set<StompTransaction> txns = new HashSet<StompTransaction>(this.namedTransactions.values());
+        for (StompTransaction each : txns) {
             try {
                 each.abort();
             } catch (StompException e) {

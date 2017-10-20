@@ -17,11 +17,7 @@
 package org.projectodd.stilts.stomp.server.protocol;
 
 import org.jboss.logging.Logger;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.channel.*;
 import org.projectodd.stilts.stomp.protocol.StompFrame;
 import org.projectodd.stilts.stomp.protocol.StompFrames;
 import org.projectodd.stilts.stomp.spi.StompConnection;
@@ -64,7 +60,7 @@ public abstract class AbstractProviderHandler extends SimpleChannelUpstreamHandl
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        log.error( "An error occurred", e.getCause() );
+        log.error("An error occurred " + e.getCause().getStackTrace()[0].toString(), e.getCause());
         ctx.getChannel().close();
     }
 
