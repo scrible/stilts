@@ -40,7 +40,9 @@ public class SendHandler extends AbstractProviderHandler {
         if (e.getMessage() instanceof StompMessage) {
             StompMessage message = (StompMessage) e.getMessage();
             String transactionId = message.getHeaders().get( Header.TRANSACTION );
-            getContext().getStompConnection().send( (StompMessage) e.getMessage(), transactionId );
+            if (getContext() != null && getContext().getStompConnection() != null) {
+                getContext().getStompConnection().send((StompMessage) e.getMessage(), transactionId);
+            }
         }
         super.messageReceived( ctx, e );
     }
