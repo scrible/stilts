@@ -1,12 +1,8 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
 import org.jboss.logging.Logger;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.channel.*;
+import org.jboss.netty.handler.codec.http.*;
 import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 
 public class HttpSinkHandler extends SimpleChannelUpstreamHandler {
@@ -23,8 +19,17 @@ public class HttpSinkHandler extends SimpleChannelUpstreamHandler {
             if (httpReq.getMethod().equals( HttpMethod.GET ) && "text/stomp-poll".equals( httpReq.getHeader( "Accept" ) )) {
                 log.debug( "Hooking up the sink" );
                 HttpMessageSink sink = this.sinkManager.get( this.context.getConnectionContext() );
-                sink.provideChannel( ctx.getChannel(), true );
-                this.provided = true;
+                if (sink != null) {
+                    sink.provideChannel(ctx.getChannel(), true);
+                    this.provided = true;
+                } else {
+                    HttpResponse httpResp = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
+                    httpResp.setHeader("Content-Length", "0");
+                    ChannelFuture future = Channels.future(ctx.getChannel());
+                    ctx.sendDownstream(new DownstreamMessageEvent(ctx.getChannel(), future, httpResp, ctx.getChannel().getRemoteAddress()));
+                    ctx.getChannel().close();
+                    return;
+                }
             }
         }
         if (!this.provided) {
