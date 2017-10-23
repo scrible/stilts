@@ -60,7 +60,9 @@ public abstract class AbstractProviderHandler extends SimpleChannelUpstreamHandl
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        log.error("An error occurred " + e.getCause().getStackTrace()[0].toString(), e.getCause());
+        log.error("An error occurred " + ((e.getCause() != null && e.getCause().getStackTrace() != null
+                        && e.getCause().getStackTrace().length > 0) ? e.getCause().getStackTrace()[0].toString() : ""),
+                e.getCause());
         ctx.getChannel().close();
     }
 
