@@ -1,13 +1,14 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
+import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
-
 public class ConnectionManager {
-    
-    private Map<String, ConnectionContext> connections = new HashMap<String, ConnectionContext>();
+
+    private Map<String, ConnectionContext> connections = Collections.synchronizedMap(new HashMap<String, ConnectionContext>());
     
     public ConnectionManager() {
         

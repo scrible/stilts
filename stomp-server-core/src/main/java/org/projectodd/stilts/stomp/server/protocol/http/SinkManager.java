@@ -1,9 +1,8 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
+
+import java.util.*;
 
 public class SinkManager {
 
@@ -19,6 +18,19 @@ public class SinkManager {
         this.sinks.put( connection, sink );
     }
 
-    private Map<ConnectionContext, HttpMessageSink> sinks = new HashMap<ConnectionContext, HttpMessageSink>();
+    public void remove(ConnectionContext connection) {
+        this.sinks.remove(connection);
+    }
+
+    public Set<Map.Entry<ConnectionContext, HttpMessageSink>> list() {
+        Set<Map.Entry<ConnectionContext, HttpMessageSink>> entries = null;
+        //get copy of the entries from the map in a synchronized block
+        synchronized (sinks) {
+            entries = new HashSet<Map.Entry<ConnectionContext, HttpMessageSink>>(sinks.entrySet());
+        }
+        return entries;
+    }
+
+    private Map<ConnectionContext, HttpMessageSink> sinks = Collections.synchronizedMap(new HashMap<ConnectionContext, HttpMessageSink>());
 
 }

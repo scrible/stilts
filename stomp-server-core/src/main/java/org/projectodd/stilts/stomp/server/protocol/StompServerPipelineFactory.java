@@ -16,11 +16,6 @@
 
 package org.projectodd.stilts.stomp.server.protocol;
 
-import java.util.concurrent.Executor;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.DefaultChannelPipeline;
@@ -31,6 +26,10 @@ import org.projectodd.stilts.stomp.server.protocol.http.SinkManager;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
 import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseHandler;
 import org.projectodd.stilts.stomp.spi.StompProvider;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import java.util.concurrent.Executor;
 
 public class StompServerPipelineFactory implements ChannelPipelineFactory {
 
@@ -58,6 +57,14 @@ public class StompServerPipelineFactory implements ChannelPipelineFactory {
         //pipeline.addLast( "flash-policy-file-handler", new FlashPolicyFileHandler() );
         pipeline.addLast( "protocol-detector", new ProtocolDetector( this.connectionManager, this.sinkManager, this.provider, this.executor, this.resourceManager) );
         return pipeline;
+    }
+
+    public SinkManager getSinkManager() {
+        return sinkManager;
+    }
+
+    public ConnectionManager getConnectionManager() {
+        return connectionManager;
     }
 
     private ConnectionManager connectionManager = new ConnectionManager();

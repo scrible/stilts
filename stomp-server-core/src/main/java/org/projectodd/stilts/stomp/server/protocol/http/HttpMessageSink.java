@@ -8,6 +8,7 @@ import org.projectodd.stilts.stomp.TransactionalAcknowledger;
 import org.projectodd.stilts.stomp.server.protocol.AckManager;
 import org.projectodd.stilts.stomp.spi.TransactionalAcknowledgeableMessageSink;
 
+import java.util.Date;
 import java.util.LinkedList;
 
 public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink {
@@ -60,6 +61,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
         }
 
         synchronized (this) {
+            this.lastHadChannelTimestamp = null;
             this.channel = channel;
             this.single = single;
         }
@@ -77,6 +79,11 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
     public synchronized void clearChannel() {
         this.channel = null;
         this.single = false;
+        this.lastHadChannelTimestamp = new Date();
+    }
+
+    public Date getLastHadChannelTimestamp() {
+        return this.lastHadChannelTimestamp;
     }
 
     private static Logger log = Logger.getLogger( HttpMessageSink.class );
@@ -85,5 +92,6 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
     protected Channel channel;
     protected LinkedList<StompMessage> messages = new LinkedList<StompMessage>();
     protected boolean single;
+    protected Date lastHadChannelTimestamp = new Date();
 
 }
