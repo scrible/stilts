@@ -61,7 +61,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
         }
 
         synchronized (this) {
-            this.lastHadChannelTimestamp = null;
+            this.lastHadChannelTimestamp = single ? new Date() : null;
             this.channel = channel;
             this.single = single;
         }
