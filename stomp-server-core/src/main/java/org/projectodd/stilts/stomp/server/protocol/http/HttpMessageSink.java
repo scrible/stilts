@@ -2,6 +2,8 @@ package org.projectodd.stilts.stomp.server.protocol.http;
 
 import org.jboss.logging.Logger;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.projectodd.stilts.stomp.StompException;
 import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.TransactionalAcknowledger;
@@ -23,7 +25,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
     }
 
     @Override
-    public synchronized void send(StompMessage message, TransactionalAcknowledger acknowledger) throws StompException {
+    public synchronized void send(final StompMessage message, TransactionalAcknowledger acknowledger) throws StompException {
         log.debug( "someone sent a message: " + message );
         if (acknowledger != null) {
             this.ackManager.registerAcknowledger( message.getId(), acknowledger );
@@ -31,9 +33,22 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
 
         if (this.channel != null) {
             log.debug( "write message to channel : " + message );
-            this.channel.write( message );
+            final ChannelFuture cf = this.channel.write(message);
             if (this.single) {
-                this.channel = null;
+                final Channel curChannel = channel;
+                final HttpMessageSink self = this;
+                this.lastHadChannelTimestamp = new Date();
+                cf.addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        if (curChannel != null) curChannel.close();
+                        if (self.channel == curChannel) self.channel = null;
+                        if (!cf.isSuccess()) {
+                            //this message failed to send
+                            log.error("Failed to send message: " + message);
+                        }
+                    }
+                });
             }
         } else {
             synchronized (this.messages) {
@@ -42,13 +57,26 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
         }
     }
 
-    public void provideChannel(Channel channel, boolean single) {
+    public void provideChannel(final Channel channel, boolean single) {
         log.debug( "someone provided a channel: " + channel );
 
         synchronized (this.messages) {
             if (single && !this.messages.isEmpty()) {
-                StompMessage message = messages.removeFirst();
-                channel.write(message);
+                final StompMessage message = messages.removeFirst();
+                final ChannelFuture cf = channel.write(message);
+                final Channel curChannel = channel;
+                cf.addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        if (curChannel != null) curChannel.close();
+                        if (!cf.isSuccess()) {
+                            //this message failed to send
+                            log.error("Failed to send message: " + message);
+                        }
+                    }
+                });
+                channel.close();
+                this.lastHadChannelTimestamp = new Date();
                 return;
             }
 
@@ -77,6 +105,13 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
     }
 
     public synchronized void clearChannel() {
+        if (this.channel != null) {
+            try {
+                this.channel.close();
+            } catch (Exception e) {
+                log.warn("Failed to close channel in HttpMessageSink.clearChannel", e);
+            }
+        }
         this.channel = null;
         this.single = false;
         this.lastHadChannelTimestamp = new Date();

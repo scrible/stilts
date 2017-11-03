@@ -1,6 +1,7 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
 import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
+import org.projectodd.stilts.stomp.spi.StompConnection;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,4 +23,19 @@ public class ConnectionManager {
         this.connections.put( connectionId, connectionContext );
     }
 
+    public void remove(String connectionId) {
+        this.connections.remove(connectionId);
+    }
+
+    public void removeConnection(StompConnection conn) {
+        synchronized (this.connections) {
+            for (String key : this.connections.keySet()) {
+                ConnectionContext ctx = this.connections.get(key);
+                if (ctx.getStompConnection() == conn) {
+                    this.connections.remove(key);
+                    break;
+                }
+            }
+        }
+    }
 }

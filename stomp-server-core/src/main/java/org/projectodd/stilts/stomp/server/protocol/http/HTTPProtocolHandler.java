@@ -93,7 +93,7 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
         pipeline.addLast( "stomp-disorderly-close-handler", new StompDisorderlyCloseHandler( provider, context ) );
 
         pipeline.addLast( "stomp-server-connect", new ConnectHandler( provider, context ) );
-        pipeline.addLast( "stomp-server-disconnect", new DisconnectHandler( provider, context ) );
+        pipeline.addLast("stomp-server-disconnect", new DisconnectHandler(provider, context, connectionManager));
 
         pipeline.addLast( "stomp-server-subscribe", new SubscribeHandler( provider, context ) );
         pipeline.addLast( "stomp-server-unsubscribe", new UnsubscribeHandler( provider, context ) );
@@ -137,7 +137,7 @@ public class HTTPProtocolHandler extends SimpleChannelUpstreamHandler {
         pipeline.addLast( "DEBUG_A", new DebugHandler( "debug-a" ) );
 
         pipeline.addLast( "stomp-server-connect", new HttpConnectHandler( provider, context, sinkManager ) );
-        pipeline.addLast("stomp-server-disconnect", new HttpDisconnectHandler(provider, context, false));
+        pipeline.addLast("stomp-server-disconnect", new HttpDisconnectHandler(provider, context, connectionManager, false));
 
         pipeline.addLast( "stomp-server-subscribe", new SubscribeHandler( provider, context ) );
         pipeline.addLast( "stomp-server-unsubscribe", new UnsubscribeHandler( provider, context ) );

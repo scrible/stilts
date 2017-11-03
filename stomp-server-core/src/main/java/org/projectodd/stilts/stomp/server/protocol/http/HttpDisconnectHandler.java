@@ -17,12 +17,12 @@ import org.projectodd.stilts.stomp.spi.StompProvider;
 public class HttpDisconnectHandler extends DisconnectHandler {
     private static Logger log = Logger.getLogger(DisconnectHandler.class);
 
-    public HttpDisconnectHandler(StompProvider server, ConnectionContext context) {
-        super(server, context);
+    public HttpDisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager) {
+        super(server, context, connectionManager);
     }
 
-    public HttpDisconnectHandler(StompProvider server, ConnectionContext context, boolean shouldClose) {
-        super(server, context, shouldClose);
+    public HttpDisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager, boolean shouldClose) {
+        super(server, context, connectionManager, shouldClose);
     }
 
     @Override

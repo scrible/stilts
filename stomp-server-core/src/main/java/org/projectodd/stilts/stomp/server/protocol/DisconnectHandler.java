@@ -26,7 +26,7 @@ import org.projectodd.stilts.stomp.protocol.StompFrame;
 import org.projectodd.stilts.stomp.protocol.StompFrame.Command;
 import org.projectodd.stilts.stomp.protocol.StompFrame.Header;
 import org.projectodd.stilts.stomp.protocol.StompFrames;
-import org.projectodd.stilts.stomp.server.protocol.websockets.DisorderlyCloseHandler;
+import org.projectodd.stilts.stomp.server.protocol.http.ConnectionManager;
 import org.projectodd.stilts.stomp.spi.StompConnection;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
@@ -34,13 +34,14 @@ public class DisconnectHandler extends AbstractControlFrameHandler {
 
     private static Logger log = Logger.getLogger(DisconnectHandler.class);
 
-    public DisconnectHandler(StompProvider server, ConnectionContext context) {
-        this( server, context, true );
+    public DisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager) {
+        this(server, context, connectionManager, true);
     }
 
-    public DisconnectHandler(StompProvider server, ConnectionContext context, boolean shouldClose) {
+    public DisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager, boolean shouldClose) {
         super( server, context, Command.DISCONNECT );
         this.shouldClose = shouldClose;
+        this.connectionManager = connectionManager;
     }
 
     @Override
@@ -49,6 +50,9 @@ public class DisconnectHandler extends AbstractControlFrameHandler {
             StompConnection stompConnection = getStompConnection();
             if (stompConnection != null) {
                 stompConnection.disconnect();
+                if (connectionManager != null) {
+                    connectionManager.removeConnection(stompConnection);
+                }
             }
         } catch (NotConnectedException e) {
             // ignore, we're shutting down anyhow
@@ -82,5 +86,5 @@ public class DisconnectHandler extends AbstractControlFrameHandler {
 
 
     private boolean shouldClose;
-
+    private ConnectionManager connectionManager;
 }

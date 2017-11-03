@@ -1,8 +1,5 @@
 package org.projectodd.stilts.stomp.server.protocol;
 
-import java.nio.charset.Charset;
-import java.util.concurrent.Executor;
-
 import org.jboss.logging.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
@@ -19,13 +16,12 @@ import org.projectodd.stilts.stomp.protocol.StompFrameEncoder;
 import org.projectodd.stilts.stomp.protocol.StompMessageDecoder;
 import org.projectodd.stilts.stomp.protocol.StompMessageEncoder;
 import org.projectodd.stilts.stomp.server.ServerStompMessageFactory;
-import org.projectodd.stilts.stomp.server.protocol.http.CORSHandler;
-import org.projectodd.stilts.stomp.server.protocol.http.ConnectionManager;
-import org.projectodd.stilts.stomp.server.protocol.http.HTTPProtocolHandler;
-import org.projectodd.stilts.stomp.server.protocol.http.OptionsHandler;
-import org.projectodd.stilts.stomp.server.protocol.http.SinkManager;
+import org.projectodd.stilts.stomp.server.protocol.http.*;
 import org.projectodd.stilts.stomp.server.protocol.resource.ResourceManager;
 import org.projectodd.stilts.stomp.spi.StompProvider;
+
+import java.nio.charset.Charset;
+import java.util.concurrent.Executor;
 
 public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
 
@@ -105,7 +101,7 @@ public class ProtocolDetector extends ReplayingDecoder<VoidEnum> {
         pipeline.addLast( "stomp-disorderly-close-handler", new StompDisorderlyCloseHandler( provider, context ) );
 
         pipeline.addLast( "stomp-server-connect", new ConnectHandler( provider, context ) );
-        pipeline.addLast( "stomp-server-disconnect", new DisconnectHandler( provider, context ) );
+        pipeline.addLast("stomp-server-disconnect", new DisconnectHandler(provider, context, connectionManager));
 
         pipeline.addLast( "stomp-server-subscribe", new SubscribeHandler( provider, context ) );
         pipeline.addLast( "stomp-server-unsubscribe", new UnsubscribeHandler( provider, context ) );
