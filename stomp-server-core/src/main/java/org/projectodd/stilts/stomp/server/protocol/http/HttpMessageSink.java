@@ -140,4 +140,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
     protected boolean single;
     protected Date lastHadChannelTimestamp = new Date();
 
+    public boolean isSingle() {
+        return this.single;
+    }
 }
