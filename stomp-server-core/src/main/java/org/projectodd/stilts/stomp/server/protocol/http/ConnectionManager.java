@@ -18,6 +18,10 @@ public class ConnectionManager {
     public ConnectionContext get(String connectionId) {
         return this.connections.get(  connectionId  );
     }
+
+    public int getConnectionCount() {
+        return this.connections.size();
+    }
     
     public void put(String connectionId, ConnectionContext connectionContext) {
         this.connections.put( connectionId, connectionContext );

@@ -22,6 +22,10 @@ public class SinkManager {
         this.sinks.remove(connection);
     }
 
+    public int getSinkCount() {
+        return this.sinks.size();
+    }
+
     public Set<Map.Entry<ConnectionContext, HttpMessageSink>> list() {
         Set<Map.Entry<ConnectionContext, HttpMessageSink>> entries = null;
         //get copy of the entries from the map in a synchronized block

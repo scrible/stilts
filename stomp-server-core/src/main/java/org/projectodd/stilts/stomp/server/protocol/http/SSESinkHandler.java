@@ -43,7 +43,8 @@ public class SSESinkHandler extends SimpleChannelUpstreamHandler {
     public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         if (this.provided) {
             HttpMessageSink sink = this.sinkManager.get( this.context.getConnectionContext() );
-            sink.clearChannel();
+            if (sink != null) sink.clearChannel();
+            this.sinkManager.remove(this.context.getConnectionContext());
         }
     }
 

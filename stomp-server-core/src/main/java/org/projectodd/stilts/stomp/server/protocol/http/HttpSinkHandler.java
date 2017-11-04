@@ -43,6 +43,7 @@ public class HttpSinkHandler extends SimpleChannelUpstreamHandler {
         if (this.provided) {
             HttpMessageSink sink = this.sinkManager.get( this.context.getConnectionContext() );
             if (sink != null) sink.clearChannel();
+            this.sinkManager.remove(this.context.getConnectionContext());
         }
     }
 
