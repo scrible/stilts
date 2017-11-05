@@ -122,7 +122,7 @@ public class ConnectionResumeHandler implements ChannelUpstreamHandler, ChannelD
         ctx.sendDownstream( e );
     }
 
-    protected String createConnectionId(ConnectionContext connectionContext) {
+    public static String createConnectionId(ConnectionContext connectionContext) {
         return Long.toHexString( new Random( System.identityHashCode( connectionContext ) ).nextLong() );
     }
 

@@ -1,6 +1,7 @@
 package org.projectodd.stilts.stomp.server.protocol.http;
 
 import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
+import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 import org.projectodd.stilts.stomp.spi.StompConnection;
 
 import java.util.Collections;
@@ -29,6 +30,15 @@ public class ConnectionManager {
 
     public void remove(String connectionId) {
         this.connections.remove(connectionId);
+    }
+
+    public void remove(ConnectionContext connectionCtx) {
+        while (connectionCtx instanceof WrappedConnectionContext) {
+            ConnectionContext wrappedConnectionCtx = ((WrappedConnectionContext) connectionCtx).getConnectionContext();
+            if (wrappedConnectionCtx == connectionCtx) break;
+            connectionCtx = wrappedConnectionCtx;
+        }
+        this.connections.remove(ConnectionResumeHandler.createConnectionId(connectionCtx));
     }
 
     public void removeConnection(StompConnection conn) {

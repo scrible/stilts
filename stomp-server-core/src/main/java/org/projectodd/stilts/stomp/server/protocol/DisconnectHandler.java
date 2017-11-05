@@ -51,7 +51,9 @@ public class DisconnectHandler extends AbstractControlFrameHandler {
             if (stompConnection != null) {
                 stompConnection.disconnect();
                 if (connectionManager != null) {
+                    //having trouble with these not being removed
                     connectionManager.removeConnection(stompConnection);
+                    connectionManager.remove(this.getContext());
                 }
             }
         } catch (NotConnectedException e) {
