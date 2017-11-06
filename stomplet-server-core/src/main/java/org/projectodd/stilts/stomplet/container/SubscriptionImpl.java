@@ -36,6 +36,9 @@ class SubscriptionImpl implements Subscription {
     public void cancel() throws StompException {
         subscriber.close();
         stomplet.onUnsubscribe( this.subscriber );
+        //Try to make things garbage collectable...
+        this.subscriber = null;
+        this.stomplet = null;
     }
 
     private Stomplet stomplet;

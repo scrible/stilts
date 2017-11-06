@@ -16,9 +16,6 @@
 
 package org.projectodd.stilts.stomplet.container;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.projectodd.stilts.stomp.Acknowledger;
 import org.projectodd.stilts.stomp.Headers;
 import org.projectodd.stilts.stomp.StompException;
@@ -30,6 +27,9 @@ import org.projectodd.stilts.stomp.spi.StompSession;
 import org.projectodd.stilts.stomplet.AcknowledgeableStomplet;
 import org.projectodd.stilts.stomplet.Stomplet;
 import org.projectodd.stilts.stomplet.Subscriber;
+
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SubscriberImpl implements Subscriber {
 
@@ -124,6 +124,12 @@ public class SubscriberImpl implements Subscriber {
         if (ackSet != null) {
             this.ackSet.close();
         }
+        //Try to make things garbage collectable...
+        this.messageSink = null;
+        this.session = null;
+        this.stomplet = null;
+        this.headers = null;
+        this.parameters = null;
     }
 
     @Override

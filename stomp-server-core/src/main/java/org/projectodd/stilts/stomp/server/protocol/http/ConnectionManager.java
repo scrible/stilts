@@ -4,9 +4,7 @@ import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
 import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 import org.projectodd.stilts.stomp.spi.StompConnection;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ConnectionManager {
 
@@ -51,5 +49,13 @@ public class ConnectionManager {
                 }
             }
         }
+    }
+
+    public Set<Map.Entry<String, ConnectionContext>> list() {
+        Set<Map.Entry<String, ConnectionContext>> entries = null;
+        synchronized (this.connections) {
+            entries = new HashSet<Map.Entry<String, ConnectionContext>>(this.connections.entrySet());
+        }
+        return entries;
     }
 }
