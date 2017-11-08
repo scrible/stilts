@@ -12,17 +12,21 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.projectodd.stilts.stomp.protocol.StompFrame;
 import org.projectodd.stilts.stomp.server.protocol.ConnectionContext;
 import org.projectodd.stilts.stomp.server.protocol.DisconnectHandler;
+import org.projectodd.stilts.stomp.server.protocol.WrappedConnectionContext;
 import org.projectodd.stilts.stomp.spi.StompProvider;
 
 public class HttpDisconnectHandler extends DisconnectHandler {
     private static Logger log = Logger.getLogger(DisconnectHandler.class);
+    protected SinkManager sinkManager;
 
-    public HttpDisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager) {
+    public HttpDisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager, SinkManager sinkManager) {
         super(server, context, connectionManager);
+        this.sinkManager = sinkManager;
     }
 
-    public HttpDisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager, boolean shouldClose) {
+    public HttpDisconnectHandler(StompProvider server, ConnectionContext context, ConnectionManager connectionManager, SinkManager sinkManager, boolean shouldClose) {
         super(server, context, connectionManager, shouldClose);
+        this.sinkManager = sinkManager;
     }
 
     @Override
@@ -36,6 +40,13 @@ public class HttpDisconnectHandler extends DisconnectHandler {
             channelContext.getChannel().close();
         } catch (Exception e) {
         }
+        ConnectionContext ctx = this.getContext();
+        while (ctx instanceof WrappedConnectionContext) {
+            this.sinkManager.remove(ctx);
+            ctx = ((WrappedConnectionContext) ctx).getConnectionContext();
+        }
+        this.sinkManager.remove(ctx);
+
 
         super.handleControlFrame(channelContext, frame);
     }
