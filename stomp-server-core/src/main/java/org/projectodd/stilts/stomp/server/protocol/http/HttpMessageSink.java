@@ -36,6 +36,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
             log.debug( "write message to channel : " + message );
             //System.out.println( "  write message to channel: " + message );
             final ChannelFuture cf = this.channel.write(message);
+            this.lastMessageSent = new Date();
             if (this.single) {
                 final Channel curChannel = channel;
                 this.channel = null; //we're using this channel so clear it out.
@@ -67,6 +68,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
                 final StompMessage message = messages.removeFirst();
                 //System.out.println( "  Pending message to be sent: " + message );
                 final ChannelFuture cf = channel.write(message);
+                this.lastMessageSent = new Date();
                 final Channel curChannel = channel;
                 cf.addListener(new ChannelFutureListener() {
                     @Override
@@ -88,6 +90,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
                 for (StompMessage each : this.messages) {
                     channel.write(each);
                 }
+                this.lastMessageSent = new Date();
                 this.messages.clear();
             }
         }
@@ -110,6 +113,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
                 for (StompMessage each : this.messages) {
                     channel.write(each);
                 }
+                this.lastMessageSent = new Date();
                 this.messages.clear();
             }
         }
@@ -139,8 +143,13 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
     protected LinkedList<StompMessage> messages = new LinkedList<StompMessage>();
     protected boolean single;
     protected Date lastHadChannelTimestamp = new Date();
+    protected Date lastMessageSent = new Date();
 
     public boolean isSingle() {
         return this.single;
+    }
+
+    public Date getLastMessageSent() {
+        return lastMessageSent;
     }
 }
