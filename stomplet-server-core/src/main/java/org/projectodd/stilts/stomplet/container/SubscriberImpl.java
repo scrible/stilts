@@ -126,7 +126,6 @@ public class SubscriberImpl implements Subscriber {
         }
         //Try to make things garbage collectable...
         this.messageSink = null;
-        this.session = null;
         this.stomplet = null;
         this.headers = null;
         this.parameters = null;
