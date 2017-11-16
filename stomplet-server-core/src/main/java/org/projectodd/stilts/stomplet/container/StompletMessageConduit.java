@@ -16,12 +16,6 @@
 
 package org.projectodd.stilts.stomplet.container;
 
-import javax.transaction.RollbackException;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-import javax.transaction.xa.XAResource;
-
 import org.jboss.logging.Logger;
 import org.projectodd.stilts.conduit.spi.MessageConduit;
 import org.projectodd.stilts.stomp.Headers;
@@ -30,6 +24,12 @@ import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.Subscription;
 import org.projectodd.stilts.stomp.spi.AcknowledgeableMessageSink;
 import org.projectodd.stilts.stomp.spi.StompSession;
+
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAResource;
 
 public class StompletMessageConduit implements MessageConduit {
 
@@ -43,7 +43,7 @@ public class StompletMessageConduit implements MessageConduit {
         this.session = session;
     }
 
-    AcknowledgeableMessageSink getMessageSink() {
+    public AcknowledgeableMessageSink getMessageSink() {
         return this.messageSink;
     }
     

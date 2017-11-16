@@ -6,7 +6,7 @@ import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.spi.AcknowledgeableMessageSink;
 import org.projectodd.stilts.stomp.spi.TransactionalAcknowledgeableMessageSink;
 
-class ConduitAcknowledgeableMessageSink implements AcknowledgeableMessageSink {
+public class ConduitAcknowledgeableMessageSink implements AcknowledgeableMessageSink {
 
     ConduitAcknowledgeableMessageSink(final TransactionalAcknowledgeableMessageSink sink) {
         this.sink = sink;
@@ -29,6 +29,10 @@ class ConduitAcknowledgeableMessageSink implements AcknowledgeableMessageSink {
         } else {
             this.sink.send( message );
         }
+    }
+
+    public TransactionalAcknowledgeableMessageSink getSink() {
+        return this.sink;
     }
 
     private final TransactionalAcknowledgeableMessageSink sink;
