@@ -32,6 +32,14 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
             this.ackManager.registerAcknowledger( message.getId(), acknowledger );
         }
 
+        if (this.messages == null) {
+            //This sink has been marked abandoned.  The lack of response to a ping/pong should hopefully cause client to
+            //reconnect from scratch.
+            //Stop here so even if we somehow get a channel, we don't send back messages.  This will prevent a client from
+            //reconnecting to an old sink and miss messages.
+            return;
+        }
+
         if (this.channel != null) {
             log.debug( "write message to channel : " + message );
             //System.out.println( "  write message to channel: " + message );
@@ -53,6 +61,17 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
                 });
             }
         } else {
+            if (this.lastMessageSent == null
+                    || this.lastMessageSent.before(new Date(new Date().getTime() - 60 * 1000)) && !this.messages.isEmpty()) {
+                //if haven't sent a message in a minute (and have pending messages), this message sink is abandoned, clear out the pending messages.
+                log.warn("Marking sink as abandoned - no messages sent in last minute- has " + this.messages.size() + " pending messages");
+                this.messages.clear();
+                this.messages = null;
+            }
+            if (this.messages == null) {
+                //This sink has been marked abandoned.  The lack of response to a ping/pong should hopefully
+                return;
+            }
             //System.out.println( "  Queue message: " + message );
             synchronized (this.messages) {
                 this.messages.add(message);
@@ -144,6 +163,7 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
     protected boolean single;
     protected Date lastHadChannelTimestamp = new Date();
     protected Date lastMessageSent = new Date();
+    protected Date sinkCreationDate = lastMessageSent;
 
     public boolean isSingle() {
         return this.single;
@@ -151,5 +171,13 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
 
     public Date getLastMessageSent() {
         return lastMessageSent;
+    }
+
+    public Date getSinkCreationDate() {
+        return sinkCreationDate;
+    }
+
+    public boolean isAbandoned() {
+        return this.messages == null;
     }
 }
