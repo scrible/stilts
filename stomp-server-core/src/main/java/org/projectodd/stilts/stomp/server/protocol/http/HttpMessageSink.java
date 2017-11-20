@@ -4,6 +4,8 @@ import org.jboss.logging.Logger;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.socket.nio.NioSocketChannel;
+import org.jboss.netty.channel.socket.nio.NioSocketChannelWriteBufferInspector;
 import org.projectodd.stilts.stomp.StompException;
 import org.projectodd.stilts.stomp.StompMessage;
 import org.projectodd.stilts.stomp.TransactionalAcknowledger;
@@ -41,6 +43,18 @@ public class HttpMessageSink implements TransactionalAcknowledgeableMessageSink 
         }
 
         if (this.channel != null) {
+            if (this.channel instanceof NioSocketChannel) {
+                //HACK!!!! in production have situations where these are left dangling which leads to problems of running out of memory.
+                NioSocketChannel nsc = (NioSocketChannel) this.channel;
+                int pendingSize = new NioSocketChannelWriteBufferInspector(nsc).getWriteBufferPendingSize();
+                if (pendingSize > 5000000) {
+                    log.warn("nioSocketChannel - outgoing write buffer more than 5MB! - removing: pending write size=" + pendingSize);
+                    //looks like a dead connection!
+                    nsc.close();
+                    this.messages = null;
+                    return;
+                }
+            }
             log.debug( "write message to channel : " + message );
             //System.out.println( "  write message to channel: " + message );
             final ChannelFuture cf = this.channel.write(message);
