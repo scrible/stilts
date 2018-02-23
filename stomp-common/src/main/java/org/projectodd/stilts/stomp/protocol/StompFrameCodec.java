@@ -1,13 +1,13 @@
 package org.projectodd.stilts.stomp.protocol;
 
-import java.nio.charset.Charset;
-import java.util.Set;
-
 import org.jboss.logging.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.projectodd.stilts.stomp.protocol.StompFrame.Command;
 import org.projectodd.stilts.stomp.protocol.StompFrame.Header;
+
+import java.nio.charset.Charset;
+import java.util.Set;
 
 public class StompFrameCodec {
 
@@ -55,7 +55,7 @@ public class StompFrameCodec {
         int nonNullBytes = buffer.bytesBefore( (byte) 0x00 );
 
         ChannelBuffer content = null;
-        if (nonNullBytes == 0) {
+        if (nonNullBytes <= 0) {
             content = ChannelBuffers.EMPTY_BUFFER;
         } else {
             content = buffer.readBytes( nonNullBytes );
