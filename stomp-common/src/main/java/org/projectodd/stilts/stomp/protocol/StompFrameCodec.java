@@ -61,7 +61,7 @@ public class StompFrameCodec {
             content = buffer.readBytes( nonNullBytes );
         }
 
-        buffer.readByte();
+        if (nonNullBytes >= 0) buffer.readByte();
         return content;
     }
 
